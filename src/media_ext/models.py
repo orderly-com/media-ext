@@ -5,7 +5,7 @@ from django.db import models
 from team.models import Team, OrderBase, ProductBase, ClientBase
 from core.models import BaseModel
 
-from ..extension import media_ext
+from .extension import media_ext
 
 @media_ext.OrderModel
 class ReadBase(OrderBase):
