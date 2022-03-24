@@ -8,7 +8,6 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 from external_app.models import ExternalAppApiKey
-from .tasks import process_clientlist
 
 from .media_ext.extension import media_ext
 
@@ -45,10 +44,10 @@ class ImportArticleList(APIView):
         if len(data['data']) > settings.API_BATCH_SIZE_L:
             return JsonResponse({'result': False, 'msg': {'title': 'Data is Valid', 'text': f'Max row of data per request is {settings.API_BATCH_SIZE_L}.'}}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        if settings.DEBUG is True:
-            process_clientlist(team_slug=team.slug, data=data)
-        else:
-            process_clientlist.delay(team_slug=team.slug, data=data)
+        # if settings.DEBUG is True:
+        #     process_clientlist(team_slug=team.slug, data=data)
+        # else:
+        #     process_clientlist.delay(team_slug=team.slug, data=data)
 
         return JsonResponse({'result': True, 'msg': {'title': 'OK', 'text': 'Client data is recived'}}, status=status.HTTP_200_OK)
 
