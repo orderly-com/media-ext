@@ -12,7 +12,7 @@ from external_app.models import ExternalAppApiKey
 from .extension import media_ext
 
 
-@media_ext.api(r'^(?P<version>(v1))/<signature>/clientlist/')
+@media_ext.api(r'^(?P<version>(v1))/<signature>/articlelist/')
 class ImportArticleList(APIView):
 
     permission_classes = [AllowAny]
