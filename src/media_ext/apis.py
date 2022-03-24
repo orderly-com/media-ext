@@ -9,7 +9,7 @@ from rest_framework import status
 
 from external_app.models import ExternalAppApiKey
 
-from .media_ext.extension import media_ext
+from .extension import media_ext
 
 
 @media_ext.api(r'^(?P<version>(v1))/<signature>/clientlist/')
