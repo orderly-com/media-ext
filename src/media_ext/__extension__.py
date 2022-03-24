@@ -1,7 +1,7 @@
 from .extension import media_ext
 
 AUTO_LOADS = [
-    'team'
+    'media_ext'
 ]
 
 extension = media_ext
