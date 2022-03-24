@@ -13,7 +13,7 @@ from .tasks import process_clientlist
 from .media_ext.extension import media_ext
 
 
-@media_ext.api('/article/')
+@media_ext.api(r'^(?P<version>(v1))/<signature>/clientlist/')
 class ImportArticleList(APIView):
 
     permission_classes = [AllowAny]
