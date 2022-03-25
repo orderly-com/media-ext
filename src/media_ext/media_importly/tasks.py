@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.models import User
 
-from orderly.models import DataSource
+from datahub.models import DataSource
 from importly.exceptions import EssentialDataMissing
 from importly.importers import DataImporter
 

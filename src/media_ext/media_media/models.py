@@ -3,7 +3,7 @@ from uuid import uuid4
 from django.db import models
 from django.contrib.postgres.fields import JSONField, ArrayField
 
-from orderly.models import DataSource
+from datahub.models import DataSource
 
 from team.models import Team, OrderBase, ProductBase, ClientBase
 from core.models import BaseModel
