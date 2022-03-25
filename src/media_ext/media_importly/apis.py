@@ -10,6 +10,7 @@ from rest_framework import status
 from external_app.models import ExternalAppApiKey
 
 from ..extension import media_ext
+from .tasks import process_articlelist
 
 
 @media_ext.api('v1/<signature>/articlelist/')
@@ -33,21 +34,21 @@ class ImportArticleList(APIView):
         try:
             data = orjson.loads(request.body.decode('utf-8'))
         except:
-            return JsonResponse({'result': False, 'msg': {'title': 'Data is Valid', 'text': 'Data is not valid or is not well formated.'}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return JsonResponse({'result': False, 'msg': {'title': 'Invalid data', 'text': 'Data is not valid or is not well formated.'}}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         if 'datasource' not in data:
-            return JsonResponse({'result': False, 'msg': {'title': 'Data is Valid', 'text': 'Datasource is missing.'}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return JsonResponse({'result': False, 'msg': {'title': 'Invalid data', 'text': 'Datasource is missing.'}}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         if 'data' not in data:
-            return JsonResponse({'result': False, 'msg': {'title': 'Data is Valid', 'text': 'Data is missing.'}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return JsonResponse({'result': False, 'msg': {'title': 'Invalid data', 'text': 'Data is missing.'}}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        if len(data['data']) > settings.API_BATCH_SIZE_L:
-            return JsonResponse({'result': False, 'msg': {'title': 'Data is Valid', 'text': f'Max row of data per request is {settings.API_BATCH_SIZE_L}.'}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        if len(data['data']) > settings.BATCH_SIZE_L:
+            return JsonResponse({'result': False, 'msg': {'title': 'Invalid data', 'text': f'Max row of data per request is {settings.API_BATCH_SIZE_L}.'}}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        # if settings.DEBUG is True:
-        #     process_clientlist(team_slug=team.slug, data=data)
-        # else:
-        #     process_clientlist.delay(team_slug=team.slug, data=data)
+        if settings.DEBUG is True:
+            process_articlelist(team_slug=team.slug, data=data)
+        else:
+            process_articlelist.delay(team_slug=team.slug, data=data)
 
         return JsonResponse({'result': True, 'msg': {'title': 'OK', 'text': 'Client data is recived'}}, status=status.HTTP_200_OK)
 

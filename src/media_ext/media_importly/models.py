@@ -6,10 +6,10 @@ from django.contrib.postgres.fields import JSONField, ArrayField
 from datahub.models import DataSource
 from team.models import Team
 
-from core.models import BaseModel, ValueTaggable
+from core.models import BaseModel, ValueTaggable, RawModel
 
 
-class Article(BaseModel):
+class Article(RawModel):
     class Meta:
         indexes = [
             models.Index(fields=['team', ]),
