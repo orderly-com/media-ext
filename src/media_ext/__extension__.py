@@ -1,7 +1,8 @@
 from .extension import media_ext
 
 AUTO_LOADS = [
-    'media_ext'
+    'media',
+    'importly',
 ]
 
 extension = media_ext
