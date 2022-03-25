@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='media-ext',
-    version='1.0.2',
+    version='1.0.3',
     url='https://github.com/orderly-com/media-ext',
     license='BSD',
     description='CDP extension for media industry',

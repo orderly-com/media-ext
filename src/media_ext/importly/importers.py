@@ -1,7 +1,8 @@
-from ..media.models import Article
 from importly.formatters import (
     Formatted, format_datetime
 )
+
+from .models import Article
 
 class ArticleDataTransfer:
     class ArticleTransfer:

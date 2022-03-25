@@ -9,7 +9,7 @@ from rest_framework import status
 
 from external_app.models import ExternalAppApiKey
 
-from .extension import media_ext
+from ..extension import media_ext
 
 
 @media_ext.api('v1/<signature>/articlelist/')
