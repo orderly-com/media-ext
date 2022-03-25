@@ -47,7 +47,7 @@ class ArticleImporter(DataImporter):
                 articlebases_to_update.add(articlebase)
 
             else:
-                articlebase = ArticleBase(external_id=article['external_id'])
+                articlebase = ArticleBase(external_id=article['external_id'], team=self.team)
                 articlebases_to_create.append(articlebase)
 
             articlebase.title = article['title']
@@ -65,17 +65,20 @@ class ArticleImporter(DataImporter):
         articles_to_create = [
             Article(
                 id=article_id, articlebase_id=articlebase.id
-            ) for article_id, articlebase in article_reverse_link_map
+            ) for article_id, articlebase in article_reverse_link_map.items()
         ]
 
         Article.objects.bulk_update(articles_to_create, ['articlebase_id'], batch_size=settings.BATCH_SIZE_M)
 
-        Through = ArticleBase.categories.through
-        article_category_links_to_create = []
-        for article in self.datalist.article_set.values('id', 'categories'):
-            for category in article['categories']:
-                article_category_links_to_create.append(
-                    Through(article_id=article['id'], articlecategory_id=category)
-                )
+        category_map = {}
+        for category in self.team.articlecategory_set.values('id', 'name', 'external_id'):
+            category_map[category['external_id']] = ArticleCategory(id=category['id'], name=category['name'])
 
-        Through.objects.bulk_create(article_category_links_to_create, batch_size=settings.BATCH_SIZE_M, ignore_conflicts=True)
+        for article in self.datalist.article_set.only('articlebase', 'categories'):
+            for category in article.categories:
+                article_category, created = self.team.articlecategory_set.get_or_create(external_id=category['id'])
+                if article_category.name != category['name']:
+                    article_category.name = category['name']
+                    article_category.save(update_fields=['name'])
+
+                article.articlebase.categories.add(article_category)

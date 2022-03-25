@@ -22,11 +22,6 @@ class PageBase(ProductBase):
 
 class ArticleCategory(BaseModel):
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['team', 'external_id']
-            )
-        ]
 
         indexes = [
             models.Index(fields=['team', ]),

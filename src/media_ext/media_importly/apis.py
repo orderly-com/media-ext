@@ -43,14 +43,14 @@ class ImportArticleList(APIView):
             return JsonResponse({'result': False, 'msg': {'title': 'Invalid data', 'text': 'Data is missing.'}}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         if len(data['data']) > settings.BATCH_SIZE_L:
-            return JsonResponse({'result': False, 'msg': {'title': 'Invalid data', 'text': f'Max row of data per request is {settings.API_BATCH_SIZE_L}.'}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return JsonResponse({'result': False, 'msg': {'title': 'Invalid data', 'text': f'Max row of data per request is {settings.BATCH_SIZE_L}.'}}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         if settings.DEBUG is True:
             process_articlelist(team_slug=team.slug, data=data)
         else:
             process_articlelist.delay(team_slug=team.slug, data=data)
 
-        return JsonResponse({'result': True, 'msg': {'title': 'OK', 'text': 'Client data is recived'}}, status=status.HTTP_200_OK)
+        return JsonResponse({'result': True, 'msg': {'title': 'OK', 'text': 'Article data is recived'}}, status=status.HTTP_200_OK)
 
         # {
         #   "datasource": "360388fc-9172-4288-bf1f-ca41ea4fed7f",

@@ -9,7 +9,7 @@ from team.models import Team
 from core.models import BaseModel, ValueTaggable
 from importly.models import RawModel
 
-from ..media_media.objects import ArticleBase
+from ..media_media.models import ArticleBase
 
 class Article(RawModel):
     class Meta:
@@ -41,4 +41,4 @@ class Article(RawModel):
 
     categories = ArrayField(JSONField(default=dict), default=list)
 
-    articlebase = models.ForeignKey(ArticleBase, blank=False, on_delete=models.CASCADE)
+    articlebase = models.ForeignKey(ArticleBase, blank=True, null=True, on_delete=models.CASCADE)
