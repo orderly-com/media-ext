@@ -6,8 +6,10 @@ from django.contrib.postgres.fields import JSONField, ArrayField
 from datahub.models import DataSource
 from team.models import Team
 
-from core.models import BaseModel, ValueTaggable, RawModel
+from core.models import BaseModel, ValueTaggable
+from importly.models import RawModel
 
+from ..media_media.objects import ArticleBase
 
 class Article(RawModel):
     class Meta:
@@ -20,8 +22,12 @@ class Article(RawModel):
             models.Index(fields=['team', 'title']),
         ]
 
+    external_id = models.CharField(max_length=128)
+
     team = models.ForeignKey(Team, blank=False, on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid4, unique=True)
+
+    datetime = models.DateTimeField(blank=True, null=True)
 
     author = models.CharField(max_length=128)
     title = models.CharField(max_length=128)
@@ -32,3 +38,7 @@ class Article(RawModel):
     datasource = models.ForeignKey(DataSource, blank=False, default=1, on_delete=models.CASCADE)
 
     attributions = JSONField(default=dict)
+
+    categories = ArrayField(JSONField(default=dict), default=list)
+
+    articlebase = models.ForeignKey(ArticleBase, blank=False, on_delete=models.CASCADE)

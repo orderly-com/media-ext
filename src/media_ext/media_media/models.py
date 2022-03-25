@@ -20,6 +20,30 @@ class PageBase(ProductBase):
     pass
 
 
+class ArticleCategory(BaseModel):
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['team', 'external_id']
+            )
+        ]
+
+        indexes = [
+            models.Index(fields=['team', ]),
+            models.Index(fields=['name', ]),
+
+            models.Index(fields=['team', 'name']),
+        ]
+
+    team = models.ForeignKey(Team, blank=False, on_delete=models.CASCADE)
+
+    external_id = models.CharField(max_length=128)
+    uuid = models.UUIDField(default=uuid4, unique=True)
+
+    name = models.CharField(max_length=128)
+    removed = models.BooleanField(default=False)
+
+
 class ArticleBase(BaseModel):
     class Meta:
         indexes = [
@@ -31,10 +55,13 @@ class ArticleBase(BaseModel):
             models.Index(fields=['team', 'title']),
         ]
 
+    external_id = models.CharField(max_length=128)
+
     team = models.ForeignKey(Team, blank=False, on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid4, unique=True)
 
-    tags = ArrayField(models.CharField(max_length=512))
+    datetime = models.DateTimeField(blank=True, null=True)
+
     author = models.CharField(max_length=128)
     title = models.CharField(max_length=128)
     content = models.TextField(blank=False)
@@ -44,6 +71,8 @@ class ArticleBase(BaseModel):
     datasource = models.ForeignKey(DataSource, blank=False, default=1, on_delete=models.CASCADE)
 
     attributions = JSONField(default=dict)
+    categories = models.ManyToManyField(ArticleCategory, blank=True)
+
 
 @media_ext.ClientModel
 class Reader(ClientBase):
