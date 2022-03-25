@@ -1,4 +1,5 @@
 from django.apps import AppConfig
 
 class MediaConfig(AppConfig):
-    name = 'media_ext.media'
+    name = 'media'
+    label = 'media_ext.media'
