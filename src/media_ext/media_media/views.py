@@ -1,20 +1,24 @@
 import datetime
 
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import ListView, View, TemplateView, UpdateView, CreateView
 from django.shortcuts import get_object_or_404, redirect, reverse
 from django.http import JsonResponse, HttpResponseForbidden
 from django.utils import timezone, translation
+from django.conf import settings
 
 from core import views as core
 from core.utils import TeamAuthPermission, ForestTimer, array_to_dict, make_datetimeStart_datetimeEnd, querydict_to_dict, sort_list_by_key, str_to_hex, bulk_create, bulk_update
 
 from tag_assigner.models import TagAssigner, ValueTag
 
-from team.mixins import TeamMixin
+from team.views import TeamMixin
 
 from .models import ArticleBase
 
 from ..extension import media_ext
+
+media_router = media_ext.router('media/')
 
 @media_ext.sidebar_item('team')
 class MediaList:
@@ -23,10 +27,11 @@ class MediaList:
 
     class ArticleList:
         name = '文章列表'
-        url = ''
+        url = '/media/articlelist/'
 
 
-class OrderListView(
+@media_router.view('articlelist/', name='article-list')
+class ArticleListView(
         core.LoginRequiredMixin, core.TeamRequiredMixin,
         core.SetDefaultBreadCrumbMixin, core.SetDefaultPageContent,
         core.GetGuidanceMixin,
@@ -46,9 +51,18 @@ class OrderListView(
 
         qs = super().get_queryset()
 
-        self.orderbase_count = 0
+        self.articlebase_count = qs.count()
 
-        return qs.filter(id=None)
+        page = self.request.GET.get('page', 1)
+        paginator = Paginator(qs, settings.PAGE_SIZE_SM)
+        try:
+            qs = paginator.page(page)
+        except PageNotAnInteger:
+            qs = paginator.page(1)
+        except EmptyPage:
+            qs = paginator.page(paginator.num_pages)
+
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -57,21 +71,21 @@ class OrderListView(
 
         if source_uuid != '':
             ds = get_object_or_404(DataSource, uuid=source_uuid)
-            context['panel_title'] = '訂單列表: ' + ds.localization['zh_tw']
+            context['panel_title'] = '文章列表: ' + ds.localization['zh_tw']
         elif status != '':
             status = get_object_or_404(OrderInternalStatus, key=status)
-            context['panel_title'] = '訂單列表: ' + status.localization['zh_tw']
+            context['panel_title'] = '文章列表: ' + status.localization['zh_tw']
         else:
-            context['panel_title'] = '訂單列表'
+            context['panel_title'] = '文章列表'
 
-        context['page_title'] = '訂單列表'
+        context['page_title'] = '文章列表'
 
         context['page_sub_title'] = '{}: {}'.format(
             translation.gettext('數據更新時間'),
             self.team.get_last_calculation_datetime().strftime('%Y-%m-%d'),
         )
 
-        context['orderbase_count'] = self.orderbase_count
+        context['articlebase_count'] = self.articlebase_count
 
         # status
         context['status_list'] = self.status_list
@@ -165,7 +179,7 @@ class OrderDetailView(
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context['page_title'] = f'訂單資料 : {self.orderbase.external_id}'
+        context['page_title'] = f'文章資料 : {self.orderbase.external_id}'
 
         context['page_sub_title'] = '{}: {}'.format(
             translation.gettext('數據更新時間'),
@@ -243,4 +257,3 @@ class OrderDetailView(
         TagAssigner.remove_tag(tag=tag, target=orderbase)
 
         return JsonResponse({'result': True})
-

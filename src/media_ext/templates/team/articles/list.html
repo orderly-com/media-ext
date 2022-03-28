@@ -35,91 +35,91 @@
                             <thead class="">
                                 <th class="col-md-2 text-left">{% trans "來源/編號" %}</th>
                                 <th class="col-md-2 text-left">{% trans "狀態" %}</th>
-                                <th class="col-md-2 text-center">{% trans "訂購日" %}</th>
-                                <th class="col-md-2 text-center">{% trans "出貨日" %}</th>
+                                <th class="col-md-2 text-center">{% trans "作者" %}</th>
+                                <th class="col-md-2 text-center">{% trans "發布日" %}</th>
                                 <th class="col-md-3 text-left">{% trans "訂購人" %}</th>
-                                <th class="col-md-1 text-right">{% trans "總價" %}</th>
+                                <th class="col-md-1 text-right">{% trans "文長" %}</th>
                             </thead>
 
                             <tbody class="text-size-small">
 
-                                {% for orderbase in orderbases %}
-                                    <tr data-id="{{ orderbase.external_id }}">
+                                {% for articlebase in articlebases %}
+                                    <tr data-id="{{ articlebase.external_id }}">
                                         {# 來源/編號 #}
                                         <td class="text-left">
                                             {% if team_has_child %}
-                                                <div class="text-size-small">{{ orderbase.team.name }}</div>
+                                                <div class="text-size-small">{{ articlebase.team.name }}</div>
                                             {% endif %}
                                             {# 來源 #}
                                             <div class="">
-                                                <a class="" href="{% url 'datahub:datasource-detail' orderbase.get_datasource_uuid %}" target="_blank">{{ orderbase.get_datasource_family_name }}</a>
+                                                <a class="" href="{% url 'datahub:datasource-detail' articlebase.datasource.uuid %}" target="_blank">{{ articlebase.datasource.name }}</a>
                                             </div>
                                             {# 編號 #}
-                                            <a href="{{orderbase.get_detail_url}}" target="_blank">{{ orderbase.external_id }}</a>
+                                            <a href="{{articlebase.get_detail_url}}" target="_blank">[{{ articlebase.external_id }}] {{ articlebase.title }}</a>
                                         </td>
 
                                         {# 狀態 #}
                                         <td class="text-left">
-                                            {{ orderbase.status_key|order_status_display }}
+                                            {{ articlebase.status_key|order_status_display }}
                                         </td>
 
-                                        {# 訂購日期 #}
+                                        {# 作者 #}
                                         <td class="text-center">
-                                            {{ orderbase.datetime|date:"Y-m-d" }}
+                                            {{ articlebase.author }}
                                         </td>
 
-                                        {# 出貨日期 #}
+                                        {# 發布日期 #}
                                         <td class="text-center">
-                                            {% if orderbase.status_key == 'CONFIRMED' %}
-                                                {{ orderbase.delivery_datetime|date:"Y-m-d" }}<br>
+                                            {% if articlebase.status_key == 'CONFIRMED' %}
+                                                {{ articlebase.datetime|date:"Y-m-d" }}<br>
                                             {% else %}
-                                                {% trans "未出貨" %}
+                                                {% trans "未發布" %}
                                             {% endif %}
                                         </td>
 
                                         {# 訂購人 #}
                                         <td class="text-left">
 
-                                            {% if orderbase.purchaser_name != "" %}
+                                            {% if articlebase.purchaser_name != "" %}
 
                                                 <div>
-                                                    <a href="{{orderbase.clientbase.get_detail_url}}" target="_blank">
-                                                    {{ orderbase.purchaser_name }}
+                                                    <a href="{{articlebase.clientbase.get_detail_url}}" target="_blank">
+                                                    {{ articlebase.purchaser_name }}
                                                     </a>
                                                 </div>
-                                                <div>{{ orderbase.get_masked_purchaser_email }}</div>
-                                                <div>{{ orderbase.get_masked_purchaser_contact_phone }}</div>
+                                                <div>{{ articlebase.get_masked_purchaser_email }}</div>
+                                                <div>{{ articlebase.get_masked_purchaser_contact_phone }}</div>
 
                                             {% else %}
 
                                                 <div>
-                                                    <a href="{{orderbase.clientbase.get_detail_url}}" target="_blank">
-                                                    {% if orderbase.clientbase.name %}
-                                                    {{ orderbase.clientbase.name }}
+                                                    <a href="{{articlebase.clientbase.get_detail_url}}" target="_blank">
+                                                    {% if articlebase.clientbase.name %}
+                                                    {{ articlebase.clientbase.name }}
                                                     {% else%}
                                                     --
                                                     {% endif %}
                                                     </a>
                                                 </div>
-                                                {% if orderbase.clientbase.email %}
-                                                    <div>{{ orderbase.clientbase.get_masked_email }}</div>
+                                                {% if articlebase.clientbase.email %}
+                                                    <div>{{ articlebase.clientbase.get_masked_email }}</div>
                                                 {% endif %}
-                                                {% if orderbase.clientbase.get_masked_contact_phone %}
-                                                    <div>{{ orderbase.clientbase.get_masked_contact_phone }}</div>
+                                                {% if articlebase.clientbase.get_masked_contact_phone %}
+                                                    <div>{{ articlebase.clientbase.get_masked_contact_phone }}</div>
                                                 {% endif %}
 
                                             {% endif %}
 
                                         </td>
 
-                                        {# 總價 #}
+                                        {# 文長 #}
                                         <td class="text-right">
-                                            <div class="h5" id="op_{{ orderbase.external_id }}_total_price">${{ orderbase.total_price|floatformat:0|int_format }}</div>
+                                            <div class="h5" id="op_{{ articlebase.external_id }}_total_price">{{ articlebase.get_pure_text_count }} 字</div>
                                         </td>
                                     </tr>
 
                                     <tr>
-                                        {# 品項數量 #}
+                                        {# 內容預覽 #}
                                         <td class="text-left" colspan=6>
 
                                             <div class="panel-collapsed">
@@ -127,7 +127,7 @@
                                                 <div class="panel-heading">
 
                                                     <div class="panel-title text-muted">
-                                                        {% trans "產品清單" %}
+                                                        {% trans "內容預覽" %}
                                                     </div>
 
                                                     <div class="heading-elements">
@@ -140,100 +140,7 @@
 
                                                 <div class="panel-body" style="display: none;">
 
-                                                    <ul class="list-unstyled list-inline">
-
-                                                    {% for op in orderbase.get_orderproducts %}
-
-                                                        <li class="list-inline-item" style="height:150px; overflow-y: auto">
-
-                                                        {% if op.refound is False %}
-
-                                                            {% with price=op.get_price quantity=op.get_quantity cost=op.get_cost subtotal=op.get_total_price original_price=op.get_original_price internal_product=op.productbase.internal_product %}
-
-                                                            {% if internal_product is True and price == 0.0 %}
-
-                                                                {% comment %}
-
-                                                                {% endcomment %}
-
-                                                            {% else %}
-
-                                                                <div class="op_container" id="op_{{ op.id }}">
-                                                                    {# external_id #}
-                                                                    <div class="text-size-small">
-                                                                        <a href="{{op.productbase.get_detail_url}}" target="_blank">{{ op.external_id }}</a>
-                                                                    </div>
-
-                                                                    {# name #}
-                                                                    <div>{{ op.name }}</div>
-
-                                                                    {# 售價: price * quantity #}
-                                                                    <div>
-                                                                        <span class="text-size-small">售價: &nbsp;</span>
-
-                                                                        {# price #}
-                                                                        {% if has_edit_data_permission %}
-                                                                            <span id="op_{{ op.id }}_price" class="op-text-editable" data-name="price" data-pk="{{ op.id }}" data-inputclass="form-control" data-type="text" data-externla-id-sync="0">{{ price }}</span>
-                                                                        {% else %}
-                                                                            <span>{{ price }}</span>
-                                                                        {% endif %}
-
-                                                                        &nbsp;<span class="text-secondary">x</span>&nbsp;
-
-                                                                        {# quantity #}
-                                                                        {% if has_edit_data_permission %}
-                                                                            <span id="op_{{ op.id }}_quantity" class="op-text-editable" data-name="quantity" data-pk="{{ op.id }}" data-inputclass="form-control" data-type="text" >{{ quantity }}</span>
-                                                                        {% else %}
-                                                                            <span>{{ quantity }}</span>
-                                                                        {% endif %}
-
-                                                                        &nbsp;<span class="text-secondary">=</span>&nbsp;
-
-                                                                        {# subtotal #}
-                                                                        <span class="subtotal" id="op_{{ op.id }}_subtotal" >{{ subtotal }}</span>
-
-                                                                    </div>
-
-                                                                    {% if internal_product is False %}
-
-                                                                        {# 原價: original_price #}
-                                                                        <div >
-                                                                            <span class="text-size-small">原價: &nbsp;</span>
-                                                                            {% if has_edit_data_permission %}
-                                                                                <span class="op-text-editable" data-name="original_price" data-pk="{{ op.id }}" data-inputclass="form-control" data-type="text" data-externla-id-sync="0">{{ original_price }}</span>
-                                                                            {% else %}
-                                                                                <span>{{ original_price }}</span>
-                                                                            {% endif %}
-                                                                        </div>
-
-                                                                        {# 成本: cost #}
-                                                                        <div class="mb-10">
-                                                                            <span class="text-size-small">成本: &nbsp;</span>
-                                                                            {% if has_edit_data_permission %}
-                                                                                <span class="op-text-editable" data-name="cost" data-pk="{{ op.id }}" data-inputclass="form-control" data-type="text" data-externla-id-sync="0">{{ cost }}</span>
-                                                                            {% else %}
-                                                                                <span>{{ cost }}</span>
-                                                                            {% endif %}
-                                                                        </div>
-
-                                                                    {% else %}
-                                                                        <div class="mb-10"></div>
-                                                                    {% endif %}
-
-                                                                </div>
-
-                                                            {% endif %}
-
-                                                            {% endwith %}
-
-                                                        {% endif %}
-
-                                                        </li>
-
-                                                    {% endfor %}
-
-                                                    </ul>
-
+                                                    {{ articlebase.content|safe }}
 
                                                 </div>
 
@@ -253,9 +160,9 @@
 
                 </div>
 
-                {% if orderbases %}
+                {% if articlebases %}
                 <div class="text-center content-group-lg pt-20">
-                    {% bootstrap_paginate orderbases range=10 show_prev_next="false" show_first_last="true" %}
+                    {% bootstrap_paginate articlebases range=10 show_prev_next="false" show_first_last="true" %}
                 </div>
                 {% endif %}
 
@@ -280,7 +187,7 @@
                         <div class="panel panel-flat mt-10 block-when-runnning" id="filter-params-count">
 
                             <div class="panel-body text-center">
-                                <div class="h1 text-info" id="result-count" data-value="{{ orderbase_count|floatformat:0|int_format }}">{{ orderbase_count|floatformat:0|int_format }}<span class="text-size-small ml-5">筆</span></div>
+                                <div class="h1 text-info" id="result-count" data-value="{{ articlebase_count|floatformat:0|int_format }}">{{ articlebase_count|floatformat:0|int_format }}<span class="text-size-small ml-5">筆</span></div>
 
                                 <div class="">
                                     <button type="button" class="btn btn-info daterange-ranges" style="width:100%">
@@ -381,13 +288,13 @@
                                             <li>
                                                 <input class="styled radio-element" type="radio" name="order-type" value="purchase_date" id="order-purchase_date" {% if view.order_type == 'purchase_date' %}checked=""{% endif %}>
 
-                                                <label class="ml-10 mb-0" for="order-purchase_date" style="cursor:pointer">{% trans "訂購日" %}</label>
+                                                <label class="ml-10 mb-0" for="order-purchase_date" style="cursor:pointer">{% trans "作者" %}</label>
                                             </li>
 
                                             <li>
                                                 <input class="styled radio-element" type="radio" name="order-type" value="delivery_date" id="order-delivery_date" {% if view.order_type == 'delivery_date' %}checked=""{% endif %}>
 
-                                                <label class="ml-10 mb-0" for="order-delivery_date" style="cursor:pointer">{% trans "出貨日" %}</label>
+                                                <label class="ml-10 mb-0" for="order-delivery_date" style="cursor:pointer">{% trans "發布日" %}</label>
                                             </li>
 
                                         </ul>
