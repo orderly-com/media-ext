@@ -1,0 +1,430 @@
+{% extends "base/app/base.html" %}
+{% load static thumbnail humanize _filters _team_tags bootstrap_pagination i18n %}
+
+{% block app_css %}
+    <link href="{% static "app/css/pages/team/orders/orders.css" %}" rel="stylesheet" type="text/css">
+{% endblock app_css %}
+
+{% block app_js %}
+    <script type="text/javascript" src="{% static "app/js/plugins/forms/editable/editable.min.js" %}" ></script>
+    <script type="text/javascript" src="{% static "app/js/pages/team/orders/orders_list.js" %}?version={{ STATIC_VERSION }}" ></script>
+{% endblock app_js %}
+
+{% block sidebar %}
+    {% include "team/_sidebar.html" %}
+{% endblock sidebar %}
+
+{% block content %}
+
+    {% with CURRENT_TEAM_AUTH|check_auth:'can_edit_data' as has_edit_data_permission %}
+    <!-- Content area -->
+    <div class="content" data-date_start="{{ date_start }}" data-date_end="{{ date_end }}" id="content">
+
+        {% csrf_token %}
+
+        <div class="row">
+
+            <div class="col-md-9">
+
+                <div class="panel panel-white block-when-runnning">
+
+                    {% with team_has_child=TEAM.has_child %}
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="">
+                                <th class="col-md-2 text-left">{% trans "來源/編號" %}</th>
+                                <th class="col-md-2 text-left">{% trans "狀態" %}</th>
+                                <th class="col-md-2 text-center">{% trans "訂購日" %}</th>
+                                <th class="col-md-2 text-center">{% trans "出貨日" %}</th>
+                                <th class="col-md-3 text-left">{% trans "訂購人" %}</th>
+                                <th class="col-md-1 text-right">{% trans "總價" %}</th>
+                            </thead>
+
+                            <tbody class="text-size-small">
+
+                                {% for orderbase in orderbases %}
+                                    <tr data-id="{{ orderbase.external_id }}">
+                                        {# 來源/編號 #}
+                                        <td class="text-left">
+                                            {% if team_has_child %}
+                                                <div class="text-size-small">{{ orderbase.team.name }}</div>
+                                            {% endif %}
+                                            {# 來源 #}
+                                            <div class="">
+                                                <a class="" href="{% url 'datahub:datasource-detail' orderbase.get_datasource_uuid %}" target="_blank">{{ orderbase.get_datasource_family_name }}</a>
+                                            </div>
+                                            {# 編號 #}
+                                            <a href="{{orderbase.get_detail_url}}" target="_blank">{{ orderbase.external_id }}</a>
+                                        </td>
+
+                                        {# 狀態 #}
+                                        <td class="text-left">
+                                            {{ orderbase.status_key|order_status_display }}
+                                        </td>
+
+                                        {# 訂購日期 #}
+                                        <td class="text-center">
+                                            {{ orderbase.datetime|date:"Y-m-d" }}
+                                        </td>
+
+                                        {# 出貨日期 #}
+                                        <td class="text-center">
+                                            {% if orderbase.status_key == 'CONFIRMED' %}
+                                                {{ orderbase.delivery_datetime|date:"Y-m-d" }}<br>
+                                            {% else %}
+                                                {% trans "未出貨" %}
+                                            {% endif %}
+                                        </td>
+
+                                        {# 訂購人 #}
+                                        <td class="text-left">
+
+                                            {% if orderbase.purchaser_name != "" %}
+
+                                                <div>
+                                                    <a href="{{orderbase.clientbase.get_detail_url}}" target="_blank">
+                                                    {{ orderbase.purchaser_name }}
+                                                    </a>
+                                                </div>
+                                                <div>{{ orderbase.get_masked_purchaser_email }}</div>
+                                                <div>{{ orderbase.get_masked_purchaser_contact_phone }}</div>
+
+                                            {% else %}
+
+                                                <div>
+                                                    <a href="{{orderbase.clientbase.get_detail_url}}" target="_blank">
+                                                    {% if orderbase.clientbase.name %}
+                                                    {{ orderbase.clientbase.name }}
+                                                    {% else%}
+                                                    --
+                                                    {% endif %}
+                                                    </a>
+                                                </div>
+                                                {% if orderbase.clientbase.email %}
+                                                    <div>{{ orderbase.clientbase.get_masked_email }}</div>
+                                                {% endif %}
+                                                {% if orderbase.clientbase.get_masked_contact_phone %}
+                                                    <div>{{ orderbase.clientbase.get_masked_contact_phone }}</div>
+                                                {% endif %}
+
+                                            {% endif %}
+
+                                        </td>
+
+                                        {# 總價 #}
+                                        <td class="text-right">
+                                            <div class="h5" id="op_{{ orderbase.external_id }}_total_price">${{ orderbase.total_price|floatformat:0|int_format }}</div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        {# 品項數量 #}
+                                        <td class="text-left" colspan=6>
+
+                                            <div class="panel-collapsed">
+
+                                                <div class="panel-heading">
+
+                                                    <div class="panel-title text-muted">
+                                                        {% trans "產品清單" %}
+                                                    </div>
+
+                                                    <div class="heading-elements">
+                                                        <ul class="icons-list">
+                                                            <li><a data-action="collapse" class="text-info"></a></li>
+                                                        </ul>
+                                                    </div>
+
+                                                </div>
+
+                                                <div class="panel-body" style="display: none;">
+
+                                                    <ul class="list-unstyled list-inline">
+
+                                                    {% for op in orderbase.get_orderproducts %}
+
+                                                        <li class="list-inline-item" style="height:150px; overflow-y: auto">
+
+                                                        {% if op.refound is False %}
+
+                                                            {% with price=op.get_price quantity=op.get_quantity cost=op.get_cost subtotal=op.get_total_price original_price=op.get_original_price internal_product=op.productbase.internal_product %}
+
+                                                            {% if internal_product is True and price == 0.0 %}
+
+                                                                {% comment %}
+
+                                                                {% endcomment %}
+
+                                                            {% else %}
+
+                                                                <div class="op_container" id="op_{{ op.id }}">
+                                                                    {# external_id #}
+                                                                    <div class="text-size-small">
+                                                                        <a href="{{op.productbase.get_detail_url}}" target="_blank">{{ op.external_id }}</a>
+                                                                    </div>
+
+                                                                    {# name #}
+                                                                    <div>{{ op.name }}</div>
+
+                                                                    {# 售價: price * quantity #}
+                                                                    <div>
+                                                                        <span class="text-size-small">售價: &nbsp;</span>
+
+                                                                        {# price #}
+                                                                        {% if has_edit_data_permission %}
+                                                                            <span id="op_{{ op.id }}_price" class="op-text-editable" data-name="price" data-pk="{{ op.id }}" data-inputclass="form-control" data-type="text" data-externla-id-sync="0">{{ price }}</span>
+                                                                        {% else %}
+                                                                            <span>{{ price }}</span>
+                                                                        {% endif %}
+
+                                                                        &nbsp;<span class="text-secondary">x</span>&nbsp;
+
+                                                                        {# quantity #}
+                                                                        {% if has_edit_data_permission %}
+                                                                            <span id="op_{{ op.id }}_quantity" class="op-text-editable" data-name="quantity" data-pk="{{ op.id }}" data-inputclass="form-control" data-type="text" >{{ quantity }}</span>
+                                                                        {% else %}
+                                                                            <span>{{ quantity }}</span>
+                                                                        {% endif %}
+
+                                                                        &nbsp;<span class="text-secondary">=</span>&nbsp;
+
+                                                                        {# subtotal #}
+                                                                        <span class="subtotal" id="op_{{ op.id }}_subtotal" >{{ subtotal }}</span>
+
+                                                                    </div>
+
+                                                                    {% if internal_product is False %}
+
+                                                                        {# 原價: original_price #}
+                                                                        <div >
+                                                                            <span class="text-size-small">原價: &nbsp;</span>
+                                                                            {% if has_edit_data_permission %}
+                                                                                <span class="op-text-editable" data-name="original_price" data-pk="{{ op.id }}" data-inputclass="form-control" data-type="text" data-externla-id-sync="0">{{ original_price }}</span>
+                                                                            {% else %}
+                                                                                <span>{{ original_price }}</span>
+                                                                            {% endif %}
+                                                                        </div>
+
+                                                                        {# 成本: cost #}
+                                                                        <div class="mb-10">
+                                                                            <span class="text-size-small">成本: &nbsp;</span>
+                                                                            {% if has_edit_data_permission %}
+                                                                                <span class="op-text-editable" data-name="cost" data-pk="{{ op.id }}" data-inputclass="form-control" data-type="text" data-externla-id-sync="0">{{ cost }}</span>
+                                                                            {% else %}
+                                                                                <span>{{ cost }}</span>
+                                                                            {% endif %}
+                                                                        </div>
+
+                                                                    {% else %}
+                                                                        <div class="mb-10"></div>
+                                                                    {% endif %}
+
+                                                                </div>
+
+                                                            {% endif %}
+
+                                                            {% endwith %}
+
+                                                        {% endif %}
+
+                                                        </li>
+
+                                                    {% endfor %}
+
+                                                    </ul>
+
+
+                                                </div>
+
+                                            </div>
+
+                                        </td>
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                    {% endwith %}
+
+                </div>
+
+                {% if orderbases %}
+                <div class="text-center content-group-lg pt-20">
+                    {% bootstrap_paginate orderbases range=10 show_prev_next="false" show_first_last="true" %}
+                </div>
+                {% endif %}
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <div class="row">
+                    <div class="col-md-6 text-left">
+                        <button class="btn btn-yellow heading-btn btn-search" id="btn-search">{% trans "開始查詢" %}</button>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <a type="button" class="btn btn-gray heading-btn text-white" id="btn-clean" href="{% url 'team:orders' %}">{% trans "清除全部條件" %}</a>
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-12">
+
+                        <div class="panel panel-flat mt-10 block-when-runnning" id="filter-params-count">
+
+                            <div class="panel-body text-center">
+                                <div class="h1 text-info" id="result-count" data-value="{{ orderbase_count|floatformat:0|int_format }}">{{ orderbase_count|floatformat:0|int_format }}<span class="text-size-small ml-5">筆</span></div>
+
+                                <div class="">
+                                    <button type="button" class="btn btn-info daterange-ranges" style="width:100%">
+                                        <i class="icon-calendar22 position-left"></i> <span></span> <b class="caret"></b>
+                                    </button>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="panel panel-flat mt-10 block-when-runnning">
+
+                            <div class="panel-body">
+
+                                <div class="row">
+
+                                    {# 訂單編號查詢 #}
+                                    <div class="col-md-12">
+                                        <legend class="text-muted">{% trans "訂單編號查詢，可用 , 隔開關鍵字" %}</legend>
+                                    </div>
+
+                                    <div class="col-md-10">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" name="search-key" id="serach-key" placeholder="{% trans "輸入訂單編號" %}" search-type="clients" autofocus>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <div class="btn-search text-left mt-10" style="cursor: pointer">
+                                            <i class="icon-search4 text-muted"></i>
+                                        </div>
+
+                                    </div>
+
+
+                                    {# 訂單狀態 #}
+                                    <div class="col-md-12">
+
+                                        <legend class="mt-10 text-muted">
+                                            <a href="{% url 'datahub:mapping_list_status' %}" target="_blank" class="text-info"><u>{% trans "訂單狀態" %}</u></a>
+                                        </legend>
+
+                                        <div class="mt-10 mr-10 text-size-small" style="position: absolute; right:0; top:10px">
+                                            <a href="#" class="list_operation" data-action="select_all" data-target="status">{% trans "全選" %}</a> / <a href="#" class="list_operation" data-action="cancle_all" data-target="status">{% trans "取消" %}</a>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        {% for status in status_list %}
+                                            <div class="checkbox order-status">
+                                                <label>
+                                                    <input type="checkbox" class="styled" name="status" value="{{ status }}" {% if status.key in enabled_status_list %}checked{% endif %}>
+                                                    &nbsp;&nbsp;{{ status.localization.zh_tw }}
+                                                </label>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+
+                                    {# 訂單來源 #}
+                                    <div class="col-md-12">
+                                        <legend class="text-muted mt-10">{% trans "訂單來源" %}</legend>
+
+                                        <div class="mt-10 mr-10 text-size-small" style="position: absolute; right:0; top:10px">
+                                            <a href="#" class="list_operation" data-action="select_all" data-target="source">{% trans "全選" %}</a> / <a href="#" class="list_operation" data-action="cancle_all" data-target="source">{% trans "取消" %}</a>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-md-12">
+
+                                        {% for source in source_list %}
+                                            <div class="checkbox order-source">
+                                                <label>
+                                                    <input type="checkbox" class="styled" name="source" value="{{ source.uuid }}" {% if source.uuid in enabled_source_list %}checked{% endif %}>
+                                                    <span class="ml-5">{{ source.name }}</span>
+                                                </label>
+                                            </div>
+                                        {% endfor %}
+
+                                    </div>
+
+
+                                    {# 排序方式 #}
+                                    <div class="col-md-12">
+                                        <legend class="mt-10 text-muted">{% trans "排序方式" %}</legend>
+
+                                        <ul class="list-unstyled">
+
+                                            <li>
+                                                <input class="styled radio-element" type="radio" name="order-type" value="amount" id="order-amount" {% if view.order_type == 'amount' %}checked=""{% endif %}>
+
+                                                <label class="ml-10 mb-0" for="order-amount" style="cursor:pointer">{% trans "總金額" %}</label>
+                                            </li>
+
+                                            <li>
+                                                <input class="styled radio-element" type="radio" name="order-type" value="purchase_date" id="order-purchase_date" {% if view.order_type == 'purchase_date' %}checked=""{% endif %}>
+
+                                                <label class="ml-10 mb-0" for="order-purchase_date" style="cursor:pointer">{% trans "訂購日" %}</label>
+                                            </li>
+
+                                            <li>
+                                                <input class="styled radio-element" type="radio" name="order-type" value="delivery_date" id="order-delivery_date" {% if view.order_type == 'delivery_date' %}checked=""{% endif %}>
+
+                                                <label class="ml-10 mb-0" for="order-delivery_date" style="cursor:pointer">{% trans "出貨日" %}</label>
+                                            </li>
+
+                                        </ul>
+
+                                    </div>
+
+
+                                    {# 進階條件 #}
+                                    <div class="col-md-12">
+                                        <legend class="text-muted mt-10">{% trans "進階條件" %}</legend>
+
+                                        {# 品項變動過 #}
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox" class="styled" id="product_changed" value="1" {% if product_changed == 1 %}checked{% endif %}>
+                                                <span class="ml-5">{% trans "品項變動過" %}</span>
+                                            </label>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+    <!-- /content area -->
+    {% endwith %}
+
+{% endblock content %}
