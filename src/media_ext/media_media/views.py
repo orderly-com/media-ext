@@ -192,6 +192,7 @@ class ArticleDetailView(
 
         context['datasource'] = self.datasource
         context['articlebase'] = self.articlebase
+        context['records_count'] = self.readbases.count()
 
         return context
 
@@ -209,37 +210,6 @@ class ArticleDetailView(
 
         self.datasource = articlebase.datasource
         self.articlebase = articlebase
+        self.readbases = articlebase.readbase_set.filter(removed=False)
 
         return super().get(request, *args, **kwargs)
-
-    def remove_tag(request, *args, **kwargs):
-
-        data = request.POST
-
-        team = Team.objects.get(id=request.session.get('team_id', None))
-
-        order_id = data.get('order_id', None)
-        datasource_id = data.get('datasource_id', None)
-
-        datasource = DataSource.objects.filter(uuid=datasource_id).only('id', 'name').first()
-
-        if datasource is None:
-            return JsonResponse({'result': False})
-
-        articlebase = team.articlebase_set.filter(datasource_id=datasource.id, external_id=order_id, removed=False).only('id', 'name').first()
-
-        if articlebase is None:
-            return JsonResponse({'result': False})
-
-        tag_id = data.get('tag_id', None)
-        if tag_id is None:
-            return JsonResponse({'result': False})
-
-        try:
-            tag = ValueTag.objects.get(uuid=tag_id, team_id=team.id, tag_type=ValueTag.MANUAL)
-        except ValueTag.DoesNotExist:
-            return JsonResponse({'result': False})
-
-        TagAssigner.remove_tag(tag=tag, target=articlebase)
-
-        return JsonResponse({'result': True})

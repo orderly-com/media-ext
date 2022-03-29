@@ -30,31 +30,6 @@
             {# left section #}
             <div class="col-md-4">
 
-                {% if datasource.platform %}
-
-                    {% with datasource.platform as platform %}
-
-                        {% if platform.logo %}
-
-                            {% thumbnail platform.logo "160x160" crop="center" as im %}
-                                <a href="{{platform.website}}" target="_blank" style="position: absolute;display: block;left: 50%;margin-left: -80px;top: -80px;">
-                                    <img src="{{ im.url }}" class="img-circle" alt="{{ articlebase.datasource.platform.name }}" style="width:160px;">
-                                </a>
-                            {% endthumbnail %}
-
-                        {% else %}
-
-                            <div style="position: absolute;display: block;left: 50%;margin-left: -80px;top: -80px;">
-                                <img src="{% static 'app/images/placeholder.jpg' %}" class="img-circle" style="width:160px;">
-                            </div>
-
-                        {% endif %}
-
-                    {% endwith %}
-
-                {% endif %}
-
-
                 {# basic profile #}
                 <div class="panel text-center" style="padding-top:80px">
 
@@ -72,57 +47,49 @@
 
                     </div>
 
-                    <div class="h5 text-semibold mb-20">{% trans "訂單編號" %}</div>
+                    <div class="h5 text-semibold mb-20">{% trans "文章編號" %}</div>
 
                     <table class="table text-left">
 
                         <tr class="row">
 
-                            <td class="col-md-4">{% trans "訂單狀態" %}</td>
+                            <td class="col-md-4">{% trans "文章狀態" %}</td>
 
                             <td class="col-md-8">
 
-                                <span class="mr-20">{{articlebase.status_key|article_status_display}}</span>
-
-                                <a href="{% url "datahub:mapping_list_status" %}" target="_blank" class="text-info text-size-small">
-                                    <u>{% trans "查看狀態列表" %}</u>
-                                </a>
+                                <span class="mr-20">{{articlebase.status|article_status_display}}</span>
 
                             </td>
 
                         </tr>
 
                         <tr class="row">
-                            <td>{% trans "通路" %}</td>
-                            <td><a href="{{datasource.get_detail_url}}" target="_blank">{{ articlebase.get_datasource_family_name }}</a></td>
+                            <td>{% trans "來源" %}</td>
+                            <td><a href="{{datasource.get_detail_url}}" target="_blank">{{ articlebase.datasource.name }}</a></td>
                         </tr>
 
                         <tr class="row">
-                            <td>{% trans "訂購日期" %}</td>
+                            <td>{% trans "發布日期" %}</td>
                             <td>
                                 {{ articlebase.datetime|date:"Y-m-d H:i:s" }}
                             </td>
                         </tr>
 
                         <tr class="row">
-                            <td>{% trans "出貨日期" %}</td>
+                            <td>{% trans "發布日期" %}</td>
                             <td>
-                                {% if articlebase.delivery_datetime %}
-                                    {{ articlebase.delivery_datetime|date:"Y-m-d" }}
+                                {% if articlebase.datetime %}
+                                    {{ articlebase.datetime|date:"Y-m-d" }}
                                 {% else %}
-                                    {% trans "未出貨" %}
+                                    {% trans "未發布" %}
                                 {% endif %}
                             </td>
                         </tr>
 
                         <tr class="row">
-                            <td>{% trans "出貨地址" %}</td>
+                            <td>{% trans "作者" %}</td>
                             <td>
-                                {% if articlebase.shipping_address %}
-                                    {{ articlebase.shipping_address }}
-                                {% else %}
-                                    {% trans "未出貨" %}
-                                {% endif %}
+                                {{ articlebase.author }}
                             </td>
                         </tr>
 
@@ -134,151 +101,15 @@
                 <div class="panel panel-white">
 
                     <div class="panel-heading">
-                        <h5 class="panel-title">{% trans "屬性與狀態" %} ({{articlebase.tags.count}})</h5>
+                        <h5 class="panel-title">{% trans "屬性與狀態" %} ({{articlebase.attributions.count}})</h5>
                         <div class="heading-elements"></div>
                     </div>
 
                     <div class="panel-body">
-                        {% for tag in articlebase.tags.all %}
-                            {% if tag.text|get_length_of_string > 0 %}
-                                <span class="label barticle-left-primary label-striped mr-10 mb-10 label-article">{{tag.parent.text}} : {{tag.text}}</span>
-                            {% endif %}
+                        {% for label, value in articlebase.attributions.items %}
+                            <span class="label barticle-left-primary label-striped mr-10 mb-10 label-article">{{ label }} : {{ value }}</span>
                         {% endfor %}
                     </div>
-                </div>
-
-            </div>
-
-            {# right section #}
-            <div class="col-md-8">
-
-                <div class="row">
-
-                    <div class="col-md-6">
-
-                        {# 訂購資訊 #}
-                        <div class="panel panel-white">
-
-                            <div class="panel-heading">
-                                <h5 class="panel-title">{% trans "訂購資訊" %}</h5>
-
-                                <div class="heading-elements"></div>
-
-                            </div>
-
-                            <table class="table text-left">
-
-                                <tbody>
-
-                                    <tr class="row">
-                                        <td class="col-md-4">{% trans "訂單金額" %}</td>
-                                        <td class="col-md-4">$ {{ articlebase.total_price|floatformat:0|int_format }}</td>
-                                        <td class="col-md-4 text-center" rowspan=2>
-                                            <div>{% trans "金額排名" %}</div>
-                                            <div class="">
-                                                <span>#</span>
-                                                <span class="text-semibold text-yellow h1">{{ articlebase.get_total_price_rank|floatformat:0|int_format }}</span>
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    <tr class="row">
-                                        <td>{% trans "支付金額" %}</td>
-                                        <td>
-                                            {% if articlebase.total_paid > 0 %}
-                                                $ {{ articlebase.total_paid|floatformat:0|int_format }}
-                                            {% else %}
-                                                $ {{ articlebase.total_price|floatformat:0|int_format }}
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {# 訂購人 #}
-                        <div class="panel panel-white">
-
-                            <div class="panel-heading">
-                                <h5 class="panel-title">{% trans "訂購人" %}</h5>
-
-                                <div class="heading-elements"></div>
-
-                            </div>
-
-                            {% with articlebase.clientbase as clientbase %}
-
-                            <table class="table text-left">
-
-                                <tbody>
-
-                                    <tr class="row">
-                                        <td class="col-md-4">{% trans "姓名" %}</td>
-                                        <td class="col-md-8">{{clientbase.name}}</td>
-                                    </tr>
-
-                                    <tr class="row">
-                                        <td>{% trans "歸戶碼" %}</td>
-                                        <td>
-                                            {% if clientbase.mobile and clientbase.mobile != ""  %}
-                                                <a href="{% url "team:client-detail" clientbase.uniq_id %}" target="_blank">{{clientbase.get_masked_mobile}}</a>
-
-                                            {% elif clientbase.main_phone and clientbase.main_phone != ""%}
-                                                <a href="{% url "team:client-detail" clientbase.uniq_id %}" target="_blank">{{clientbase.get_masked_main_phone}}</a>
-
-                                            {% elif clientbase.email and clientbase.email != ""%}
-                                                <a href="{% url "team:client-detail" clientbase.uniq_id %}" target="_blank">{{clientbase.get_masked_email}}</a>
-
-                                            {% elif clientbase.external_id and clientbase.external_id != ""%}
-                                                <a href="{% url "team:client-detail" clientbase.uniq_id %}" target="_blank">{{clientbase.get_masked_external_id}}</a>
-
-                                            {% elif clientbase.name and clientbase.name != ""%}
-                                                <a href="{% url "team:client-detail" clientbase.uniq_id %}" target="_blank">{{clientbase.name}}</a>
-
-                                            {% else %}
-                                                <a href="{% url "team:client-detail" clientbase.uniq_id %}" target="_blank">客戶</a>
-
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-
-                                    <tr class="row">
-                                        <td class="">{% trans "狀態" %}</td>
-                                        <td class="">
-                                            {% if clientbase.is_return %}
-                                                [ <span class="text-muted">{% trans "新客" %}</span> /  <strong >{% trans "回購客" %}</strong>]
-                                            {% else %}
-                                                [<strong>{% trans "新客" %}</strong>/ <span class="text-muted">{% trans "回購客" %}</span>  ]
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-
-                                    <tr class="row">
-                                        <td>{% trans "郵件信箱" %}</td>
-                                        <td>{{ clientbase.get_masked_email }}</td>
-                                    </tr>
-
-                                    <tr class="row">
-                                        <td>{% trans "電話" %}</td>
-                                        <td>{{ clientbase.get_masked_mobile }}</td>
-                                    </tr>
-
-
-                                </tbody>
-
-                            </table>
-
-                            {% endwith %}
-
-                        </div>
-
-                    </div>
-
-                    <div class="col-md-12">
-
-                    </div>
-
                 </div>
 
             </div>
