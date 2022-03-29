@@ -9,7 +9,7 @@
 
 
 {% block app_js %}
-    <script type="text/javascript" src="{% static "app/js/pages/team/orders/orders.js" %}?version={{STATIC_VERSION}}" ></script>
+    <script type="text/javascript" src="{% static "app/js/pages/team/articles/articles.js" %}?version={{STATIC_VERSION}}" ></script>
 {% endblock app_js%}
 
 {% block sidebar %}
@@ -82,7 +82,7 @@
 
                             <td class="col-md-8">
 
-                                <span class="mr-20">{{articlebase.status_key|order_status_display}}</span>
+                                <span class="mr-20">{{articlebase.status_key|article_status_display}}</span>
 
                                 <a href="{% url "datahub:mapping_list_status" %}" target="_blank" class="text-info text-size-small">
                                     <u>{% trans "查看狀態列表" %}</u>
@@ -141,7 +141,7 @@
                     <div class="panel-body">
                         {% for tag in articlebase.tags.all %}
                             {% if tag.text|get_length_of_string > 0 %}
-                                <span class="label border-left-primary label-striped mr-10 mb-10 label-order">{{tag.parent.text}} : {{tag.text}}</span>
+                                <span class="label barticle-left-primary label-striped mr-10 mb-10 label-article">{{tag.parent.text}} : {{tag.text}}</span>
                             {% endif %}
                         {% endfor %}
                     </div>

@@ -2,12 +2,12 @@
 {% load static thumbnail humanize _filters _team_tags _article_filter bootstrap_pagination i18n %}
 
 {% block app_css %}
-    <link href="{% static "app/css/pages/team/orders/orders.css" %}" rel="stylesheet" type="text/css">
+    <link href="{% static "app/css/pages/team/articles/articles.css" %}" rel="stylesheet" type="text/css">
 {% endblock app_css %}
 
 {% block app_js %}
     <script type="text/javascript" src="{% static "app/js/plugins/forms/editable/editable.min.js" %}" ></script>
-    <script type="text/javascript" src="{% static "app/js/pages/team/orders/orders_list.js" %}?version={{ STATIC_VERSION }}" ></script>
+    <script type="text/javascript" src="{% static "app/js/pages/team/articles/articles_list.js" %}?version={{ STATIC_VERSION }}" ></script>
 {% endblock app_js %}
 
 {% block sidebar %}
@@ -128,7 +128,7 @@
                                                 </div>
 
                                                 <div class="panel-body" style="display: none;">
-                                                    <iframe srcDoc="{{articlebase.content}}" width="100%" height="100%" frameBorder="0"></iframe>
+                                                    <iframe srcDoc="{{articlebase.content}}" width="100%" height="100%" frameBarticle="0"></iframe>
                                                 </div>
 
                                             </div>
@@ -163,7 +163,7 @@
                         <button class="btn btn-yellow heading-btn btn-search" id="btn-search">{% trans "開始查詢" %}</button>
                     </div>
                     <div class="col-md-6 text-right">
-                        <a type="button" class="btn btn-gray heading-btn text-white" id="btn-clean" href="{% url 'team:orders' %}">{% trans "清除全部條件" %}</a>
+                        <a type="button" class="btn btn-gray heading-btn text-white" id="btn-clean" href="{% url 'team:articles' %}">{% trans "清除全部條件" %}</a>
                     </div>
                 </div>
 
@@ -227,7 +227,7 @@
 
                                     <div class="col-md-12">
                                         {% for status in status_list %}
-                                            <div class="checkbox order-status">
+                                            <div class="checkbox article-status">
                                                 <label>
                                                     <input type="checkbox" class="styled" name="status" value="{{ status }}" {% if status.key in enabled_status_list %}checked{% endif %}>
                                                     &nbsp;&nbsp;{{ status.localization.zh_tw }}
@@ -249,7 +249,7 @@
                                     <div class="col-md-12">
 
                                         {% for source in source_list %}
-                                            <div class="checkbox order-source">
+                                            <div class="checkbox article-source">
                                                 <label>
                                                     <input type="checkbox" class="styled" name="source" value="{{ source.uuid }}" {% if source.uuid in enabled_source_list %}checked{% endif %}>
                                                     <span class="ml-5">{{ source.name }}</span>
@@ -267,21 +267,21 @@
                                         <ul class="list-unstyled">
 
                                             <li>
-                                                <input class="styled radio-element" type="radio" name="order-type" value="amount" id="order-amount" {% if view.order_type == 'amount' %}checked=""{% endif %}>
+                                                <input class="styled radio-element" type="radio" name="article-type" value="amount" id="article-amount" {% if view.article_type == 'amount' %}checked=""{% endif %}>
 
-                                                <label class="ml-10 mb-0" for="order-amount" style="cursor:pointer">{% trans "總金額" %}</label>
+                                                <label class="ml-10 mb-0" for="article-amount" style="cursor:pointer">{% trans "總金額" %}</label>
                                             </li>
 
                                             <li>
-                                                <input class="styled radio-element" type="radio" name="order-type" value="purchase_date" id="order-purchase_date" {% if view.order_type == 'purchase_date' %}checked=""{% endif %}>
+                                                <input class="styled radio-element" type="radio" name="article-type" value="purchase_date" id="article-purchase_date" {% if view.article_type == 'purchase_date' %}checked=""{% endif %}>
 
-                                                <label class="ml-10 mb-0" for="order-purchase_date" style="cursor:pointer">{% trans "作者" %}</label>
+                                                <label class="ml-10 mb-0" for="article-purchase_date" style="cursor:pointer">{% trans "作者" %}</label>
                                             </li>
 
                                             <li>
-                                                <input class="styled radio-element" type="radio" name="order-type" value="delivery_date" id="order-delivery_date" {% if view.order_type == 'delivery_date' %}checked=""{% endif %}>
+                                                <input class="styled radio-element" type="radio" name="article-type" value="delivery_date" id="article-delivery_date" {% if view.article_type == 'delivery_date' %}checked=""{% endif %}>
 
-                                                <label class="ml-10 mb-0" for="order-delivery_date" style="cursor:pointer">{% trans "發布日" %}</label>
+                                                <label class="ml-10 mb-0" for="article-delivery_date" style="cursor:pointer">{% trans "發布日" %}</label>
                                             </li>
 
                                         </ul>
