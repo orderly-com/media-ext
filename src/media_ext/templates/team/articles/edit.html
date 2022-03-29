@@ -1,0 +1,425 @@
+{% extends "base/app/base.html" %}
+{% load static thumbnail humanize _filters _campaign_tags i18n %}
+
+{% comment %}
+{% block title %}{{ app.get_title }}:{{ app.short_description }}{% endblock title %}
+{% endcomment %}
+
+{% block app_css %}{% endblock app_css%}
+
+
+{% block app_js %}
+    <script type="text/javascript" src="{% static "app/js/pages/team/orders/orders.js" %}?version={{STATIC_VERSION}}" ></script>
+{% endblock app_js%}
+
+{% block sidebar %}
+    {% include "../_sidebar.html" %}
+{% endblock sidebar %}
+
+{% block content %}
+
+    <!-- Content area -->
+    <div class="content">
+
+        {% csrf_token %}
+
+        {% include "../_dataview_control_bar.html" with detail_url=articlebase.get_detail_url analytics_url=articlebase.get_analytics_url records_url=articlebase.get_records_url enable_analytics=False %}
+
+        <div class="row" style="margin-top:80px">
+
+            {# left section #}
+            <div class="col-md-4">
+
+                {% if datasource.platform %}
+
+                    {% with datasource.platform as platform %}
+
+                        {% if platform.logo %}
+
+                            {% thumbnail platform.logo "160x160" crop="center" as im %}
+                                <a href="{{platform.website}}" target="_blank" style="position: absolute;display: block;left: 50%;margin-left: -80px;top: -80px;">
+                                    <img src="{{ im.url }}" class="img-circle" alt="{{ articlebase.datasource.platform.name }}" style="width:160px;">
+                                </a>
+                            {% endthumbnail %}
+
+                        {% else %}
+
+                            <div style="position: absolute;display: block;left: 50%;margin-left: -80px;top: -80px;">
+                                <img src="{% static 'app/images/placeholder.jpg' %}" class="img-circle" style="width:160px;">
+                            </div>
+
+                        {% endif %}
+
+                    {% endwith %}
+
+                {% endif %}
+
+
+                {# basic profile #}
+                <div class="panel text-center" style="padding-top:80px">
+
+                    <div class="panel-heading">
+
+                        <div class="panel-title h1">
+
+                            {% if  TEAM.has_child %}
+                                <div class="text-primary">{{articlebase.team.name}} - {{articlebase.external_id}}</div>
+                            {% else %}
+                                <div class="text-primary">{{articlebase.external_id}}</div>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    <div class="h5 text-semibold mb-20">{% trans "訂單編號" %}</div>
+
+                    <table class="table text-left">
+
+                        <tr class="row">
+
+                            <td class="col-md-4">{% trans "訂單狀態" %}</td>
+
+                            <td class="col-md-8">
+
+                                <span class="mr-20">{{articlebase.status_key|order_status_display}}</span>
+
+                                <a href="{% url "datahub:mapping_list_status" %}" target="_blank" class="text-info text-size-small">
+                                    <u>{% trans "查看狀態列表" %}</u>
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                        <tr class="row">
+                            <td>{% trans "通路" %}</td>
+                            <td><a href="{{datasource.get_detail_url}}" target="_blank">{{ articlebase.get_datasource_family_name }}</a></td>
+                        </tr>
+
+                        <tr class="row">
+                            <td>{% trans "訂購日期" %}</td>
+                            <td>
+                                {{ articlebase.datetime|date:"Y-m-d H:i:s" }}
+                            </td>
+                        </tr>
+
+                        <tr class="row">
+                            <td>{% trans "出貨日期" %}</td>
+                            <td>
+                                {% if articlebase.delivery_datetime %}
+                                    {{ articlebase.delivery_datetime|date:"Y-m-d" }}
+                                {% else %}
+                                    {% trans "未出貨" %}
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <tr class="row">
+                            <td>{% trans "出貨地址" %}</td>
+                            <td>
+                                {% if articlebase.shipping_address %}
+                                    {{ articlebase.shipping_address }}
+                                {% else %}
+                                    {% trans "未出貨" %}
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                    </table>
+
+                </div>
+
+                {# 屬性與狀態 #}
+                <div class="panel panel-white">
+
+                    <div class="panel-heading">
+                        <h5 class="panel-title">{% trans "屬性與狀態" %} ({{articlebase.tags.count}})</h5>
+                        <div class="heading-elements"></div>
+                    </div>
+
+                    <div class="panel-body">
+                        {% for tag in articlebase.tags.all %}
+                            {% if tag.text|get_length_of_string > 0 %}
+                                <span class="label border-left-primary label-striped mr-10 mb-10 label-order">{{tag.parent.text}} : {{tag.text}}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+
+            {# right section #}
+            <div class="col-md-8">
+
+                <div class="row">
+
+                    <div class="col-md-6">
+
+                        {# 訂購資訊 #}
+                        <div class="panel panel-white">
+
+                            <div class="panel-heading">
+                                <h5 class="panel-title">{% trans "訂購資訊" %}</h5>
+
+                                <div class="heading-elements"></div>
+
+                            </div>
+
+                            <table class="table text-left">
+
+                                <tbody>
+
+                                    <tr class="row">
+                                        <td class="col-md-4">{% trans "訂單金額" %}</td>
+                                        <td class="col-md-4">$ {{ articlebase.total_price|floatformat:0|int_format }}</td>
+                                        <td class="col-md-4 text-center" rowspan=2>
+                                            <div>{% trans "金額排名" %}</div>
+                                            <div class="">
+                                                <span>#</span>
+                                                <span class="text-semibold text-yellow h1">{{ articlebase.get_total_price_rank|floatformat:0|int_format }}</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr class="row">
+                                        <td>{% trans "支付金額" %}</td>
+                                        <td>
+                                            {% if articlebase.total_paid > 0 %}
+                                                $ {{ articlebase.total_paid|floatformat:0|int_format }}
+                                            {% else %}
+                                                $ {{ articlebase.total_price|floatformat:0|int_format }}
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {# 訂購人 #}
+                        <div class="panel panel-white">
+
+                            <div class="panel-heading">
+                                <h5 class="panel-title">{% trans "訂購人" %}</h5>
+
+                                <div class="heading-elements"></div>
+
+                            </div>
+
+                            {% with articlebase.clientbase as clientbase %}
+
+                            <table class="table text-left">
+
+                                <tbody>
+
+                                    <tr class="row">
+                                        <td class="col-md-4">{% trans "姓名" %}</td>
+                                        <td class="col-md-8">{{clientbase.name}}</td>
+                                    </tr>
+
+                                    <tr class="row">
+                                        <td>{% trans "歸戶碼" %}</td>
+                                        <td>
+                                            {% if clientbase.mobile and clientbase.mobile != ""  %}
+                                                <a href="{% url "team:client-detail" clientbase.uniq_id %}" target="_blank">{{clientbase.get_masked_mobile}}</a>
+
+                                            {% elif clientbase.main_phone and clientbase.main_phone != ""%}
+                                                <a href="{% url "team:client-detail" clientbase.uniq_id %}" target="_blank">{{clientbase.get_masked_main_phone}}</a>
+
+                                            {% elif clientbase.email and clientbase.email != ""%}
+                                                <a href="{% url "team:client-detail" clientbase.uniq_id %}" target="_blank">{{clientbase.get_masked_email}}</a>
+
+                                            {% elif clientbase.external_id and clientbase.external_id != ""%}
+                                                <a href="{% url "team:client-detail" clientbase.uniq_id %}" target="_blank">{{clientbase.get_masked_external_id}}</a>
+
+                                            {% elif clientbase.name and clientbase.name != ""%}
+                                                <a href="{% url "team:client-detail" clientbase.uniq_id %}" target="_blank">{{clientbase.name}}</a>
+
+                                            {% else %}
+                                                <a href="{% url "team:client-detail" clientbase.uniq_id %}" target="_blank">客戶</a>
+
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+
+                                    <tr class="row">
+                                        <td class="">{% trans "狀態" %}</td>
+                                        <td class="">
+                                            {% if clientbase.is_return %}
+                                                [ <span class="text-muted">{% trans "新客" %}</span> /  <strong >{% trans "回購客" %}</strong>]
+                                            {% else %}
+                                                [<strong>{% trans "新客" %}</strong>/ <span class="text-muted">{% trans "回購客" %}</span>  ]
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+
+                                    <tr class="row">
+                                        <td>{% trans "郵件信箱" %}</td>
+                                        <td>{{ clientbase.get_masked_email }}</td>
+                                    </tr>
+
+                                    <tr class="row">
+                                        <td>{% trans "電話" %}</td>
+                                        <td>{{ clientbase.get_masked_mobile }}</td>
+                                    </tr>
+
+
+                                </tbody>
+
+                            </table>
+
+                            {% endwith %}
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        {# 消費回饋 #}
+                        <div class="panel panel-white">
+
+                            {% with articlebase.get_review_behavior as review_behavior%}
+
+                            <div class="panel-heading">
+                                <h5 class="panel-title">{% trans "消費回饋" %}</h5>
+                                <div class="heading-elements"></div>
+                            </div>
+
+                            <div class="panel-body text-center">
+
+                                <div class="row">
+
+                                    <div class="col-md-1"></div>
+
+                                    <div class="col-md-10">
+
+                                        <div class="row text-center">
+                                            <div class="text-semibold text-yellow h2 mb-20">
+                                                {% if review_behavior %}
+                                                    {{ review_behavior.emotion|trans_emotion }}
+                                                {% else %}
+                                                    {% trans "暫無回饋" %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12 mb-10">
+                                            <div class="progress" style="height: 8px;">
+                                                {% if review_behavior %}
+                                                    <div class="progress-bar bg-secondary" role="progressbar" style="width: {{  review_behavior.grained_sentiment|multiply:20 }}%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
+                                                {% else %}
+                                                    <div class="progress-bar bg-secondary" role="progressbar" style="width: 0%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6 text-left">{% trans "負向" %}</div>
+
+                                        <div class="col-md-6 text-right">{% trans "正向" %}</div>
+
+                                    </div>
+
+                                    <div class="col-md-1"></div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="panel-body text-center">
+
+                                {% if review_behavior.feedback %}
+
+                                    <div>
+                                        <h5 class="text-center">{{ review_behavior.feedback }}</h5>
+                                    </div>
+
+                                {% endif %}
+
+                                <div class="">
+                                    {% with review_behavior|get_ele_from_dict_by_key:"score" as score %}
+                                        <ul class="list-inline text-yellow">
+                                            <li>
+                                                <i class="text-review-{{ score }} {% if score > 0 %} icon-star-full2 {% else %} icon-star-empty3 {% endif %}"></i>
+                                                <i class="text-review-{{ score }} {% if score > 1 %} icon-star-full2 {% else %} icon-star-empty3 {% endif %}"></i>
+                                                <i class="text-review-{{ score }} {% if score > 2 %} icon-star-full2 {% else %} icon-star-empty3 {% endif %}"></i>
+                                                <i class="text-review-{{ score }} {% if score > 3 %} icon-star-full2 {% else %} icon-star-empty3 {% endif %}"></i>
+                                                <i class="text-review-{{ score }} {% if score > 4 %} icon-star-full2 {% else %} icon-star-empty3 {% endif %}"></i>
+                                            </li>
+                                        </ul>
+                                    {% endwith %}
+                                </div>
+
+                                <p class="text-muted text-size-small">{{ review_behavior|get_ele_from_dict_by_key:"date"|date:"Y-m-d H:i:s"}}</p>
+
+                            </div>
+
+
+                            <div>
+
+                                {% with review_behavior|get_ele_from_dict_by_key:"reviews" as reviews %}
+
+                                    {% if review_behavior == None %}
+
+                                    <div style="height:200px">
+                                        <h3 class="text-center">{% trans "暫無評價" %}</h3>
+                                    </div>
+
+                                    {% else %}
+
+                                        <table class="table">
+                                            <tbody>
+
+                                            {% for review in reviews %}
+                                                <tr class="row">
+                                                    <td class="col-md-4">{{ review }}</td>
+                                                    <td class="col-md-8">
+                                                    {% with reviews|get_ele_from_dict_by_key:review as rate %}
+                                                        <ul class="list-inline text-yellow">
+                                                            <li>
+                                                                <i class="text-review-{{ rate }} {% if rate > 0 %} icon-star-full2 {% else %} icon-star-empty3 {% endif %}"></i>
+                                                                <i class="text-review-{{ rate }} {% if rate > 1 %} icon-star-full2 {% else %} icon-star-empty3 {% endif %}"></i>
+                                                                <i class="text-review-{{ rate }} {% if rate > 2 %} icon-star-full2 {% else %} icon-star-empty3 {% endif %}"></i>
+                                                                <i class="text-review-{{ rate }} {% if rate > 3 %} icon-star-full2 {% else %} icon-star-empty3 {% endif %}"></i>
+                                                                <i class="text-review-{{ rate }} {% if rate > 4 %} icon-star-full2 {% else %} icon-star-empty3 {% endif %}"></i>
+                                                            </li>
+                                                        </ul>
+                                                    {% endwith %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+
+                                    {% endif %}
+
+                                {% endwith %}
+
+                            </div>
+
+                            {% endwith %}
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-12">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {# middle section #}
+            <div class="col-md-12">
+
+            </div>
+
+        </div>
+
+    </div>
+    <!-- /content area -->
+
+{% endblock content %}

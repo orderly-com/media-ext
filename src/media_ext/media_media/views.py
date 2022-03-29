@@ -164,14 +164,14 @@ class ArticleListView(
         return super().get(request, *args, **kwargs)
 
 
-class OrderDetailView(
+class ArticleDetailView(
         core.LoginRequiredMixin, core.TeamRequiredMixin,
         core.SetDefaultBreadCrumbMixin, core.SetDefaultPageContent,
         core.GetGuidanceMixin,
         TeamMixin,
         TemplateView):
 
-    template_name = 'team/orders/detail.html'
+    template_name = 'team/articles/detail.html'
 
     MENU = 'team'
     SIDEBAR_MENU = 'orders'
