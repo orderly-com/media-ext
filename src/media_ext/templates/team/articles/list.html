@@ -1,5 +1,5 @@
 {% extends "base/app/base.html" %}
-{% load static thumbnail humanize _filters _team_tags bootstrap_pagination i18n %}
+{% load static thumbnail humanize _filters _team_tags _article_filter bootstrap_pagination i18n %}
 
 {% block app_css %}
     <link href="{% static "app/css/pages/team/orders/orders.css" %}" rel="stylesheet" type="text/css">
@@ -60,7 +60,7 @@
 
                                         {# 狀態 #}
                                         <td class="text-left">
-                                            {{ articlebase.status_key|order_status_display }}
+                                            {{ articlebase.status|article_status_display }}
                                         </td>
 
                                         {# 作者 #}
@@ -70,7 +70,7 @@
 
                                         {# 發布日期 #}
                                         <td class="text-center">
-                                            {% if articlebase.status_key == 'CONFIRMED' %}
+                                            {% if articlebase.status == 'CONFIRMED' %}
                                                 {{ articlebase.datetime|date:"Y-m-d" }}<br>
                                             {% else %}
                                                 {% trans "未發布" %}

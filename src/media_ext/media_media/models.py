@@ -62,6 +62,20 @@ class ArticleBase(BaseModel):
     title = models.CharField(max_length=128)
     content = models.TextField(blank=False)
 
+    STATE_DRAFT = 'draft'
+    STATE_PUBLISHED = 'schedule'
+    STATE_PRIVATE = 'sending'
+    STATE_UNSET = 'completed'
+
+    # discard soon
+    STATE_CHOICES = (
+        (STATE_DRAFT, '草稿'),
+        (STATE_PUBLISHED, '已發布'),
+        (STATE_PRIVATE, '未公開'),
+        (STATE_UNSET, '未知'),
+    )
+    status = models.CharField(max_length=64, choices=STATE_CHOICES, default='draft')
+
     removed = models.BooleanField(default=False)
 
     datasource = models.ForeignKey(DataSource, blank=False, default=1, on_delete=models.CASCADE)
