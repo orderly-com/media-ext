@@ -18,7 +18,7 @@ from .models import ArticleBase
 
 from ..extension import media_ext
 
-media_router = media_ext.router('team')
+media_router = media_ext.router('media/', name='media')
 
 @media_ext.sidebar_item('team')
 class MediaList:
