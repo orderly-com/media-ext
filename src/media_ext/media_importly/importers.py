@@ -47,7 +47,7 @@ class ArticleImporter(DataImporter):
                 articlebases_to_update.add(articlebase)
 
             else:
-                articlebase = ArticleBase(external_id=article['external_id'], team=self.team)
+                articlebase = ArticleBase(external_id=article['external_id'], team=self.team, datasource=self.datasource)
                 articlebases_to_create.append(articlebase)
 
             articlebase.title = article['title']

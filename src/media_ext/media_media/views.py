@@ -28,10 +28,10 @@ class MediaList:
     class ArticleList:
         name = '文章列表'
         menu_name = 'articles'
-        url = '/media/articlelist/'
+        url = '/media/articles/'
 
 
-@media_router.view('articlelist/', name='articles')
+@media_router.view('articles/', name='articles')
 class ArticleListView(
         core.LoginRequiredMixin, core.TeamRequiredMixin,
         core.SetDefaultBreadCrumbMixin, core.SetDefaultPageContent,
@@ -130,7 +130,7 @@ class ArticleListView(
         # get status
         # enabled_status_list = self.request.GET.getlist('enabled_status_list[]', [])
         # if len(enabled_status_list) == 0:
-        #     self.enabled_status_list = [OrderBase.STATUS_CONFIRMED, OrderBase.STATUS_KEEP, OrderBase.STATUS_ABANDONED]
+        #     self.enabled_status_list = [articlebase.STATUS_CONFIRMED, articlebase.STATUS_KEEP, articlebase.STATUS_ABANDONED]
         # else:
         #     self.enabled_status_list = enabled_status_list
         self.enabled_status_list = []
@@ -164,6 +164,7 @@ class ArticleListView(
         return super().get(request, *args, **kwargs)
 
 
+@media_router.view('articles/<uuid>/', name='article-detail')
 class ArticleDetailView(
         core.LoginRequiredMixin, core.TeamRequiredMixin,
         core.SetDefaultBreadCrumbMixin, core.SetDefaultPageContent,
@@ -174,56 +175,40 @@ class ArticleDetailView(
     template_name = 'team/articles/detail.html'
 
     MENU = 'team'
-    SIDEBAR_MENU = 'orders'
+    SIDEBAR_MENU = 'articles'
     TAB_MENU = 'detail'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context['page_title'] = f'文章資料 : {self.orderbase.external_id}'
+        context['page_title'] = f'文章資料 : {self.articlebase.external_id}'
 
         context['page_sub_title'] = '{}: {}'.format(
             translation.gettext('數據更新時間'),
             self.team.get_last_calculation_datetime().strftime('%Y-%m-%d'),
         )
 
-        context['panel_title'] = f'{self.orderbase.external_id} (${self.orderbase.total_price})'
+        context['panel_title'] = f'{self.articlebase.external_id} ({self.articlebase.get_pure_text_count()} 字)'
 
         context['datasource'] = self.datasource
-        context['orderbase'] = self.orderbase
-        context['records_count'] = self.orderproducts.count()
+        context['articlebase'] = self.articlebase
 
         return context
 
     def get(self, request, *args, **kwargs):
 
-        uniq_id = kwargs.get('uniq_id', None)
+        uuid = kwargs.get('uuid', None)
 
-        if uniq_id is None:
+        if uuid is None:
             return HttpResponseForbidden()
 
-        # orderbase
-        if self.team.has_child:
-            orderbase_qs = OrderBase.objects.select_related('clientbase').filter(team__in=self.team.get_children())
-        else:
-            orderbase_qs = OrderBase.objects.select_related('clientbase').filter(team=self.team)
+        articlebase = self.team.articlebase_set.filter(uuid=uuid, removed=False).first()
 
-        orderbase = orderbase_qs.filter(uniq_id=uniq_id, removed=False).first()
-
-        if orderbase is None:
+        if articlebase is None:
             return HttpResponseForbidden()
 
-        try:
-            datasource = DataSource.objects.only('id').get(id=orderbase.datasource_id)
-        except Exception:
-            return HttpResponseForbidden()
-
-        # orderproducts
-        orderproducts = orderbase.orderproduct_set.select_related('productbase').order_by('productbase__internal_product', 'refound', '-append', 'c_at')
-
-        self.datasource = datasource
-        self.orderbase = orderbase
-        self.orderproducts = orderproducts
+        self.datasource = articlebase.datasource
+        self.articlebase = articlebase
 
         return super().get(request, *args, **kwargs)
 
@@ -241,9 +226,9 @@ class ArticleDetailView(
         if datasource is None:
             return JsonResponse({'result': False})
 
-        orderbase = team.orderbase_set.filter(datasource_id=datasource.id, external_id=order_id, removed=False).only('id', 'name').first()
+        articlebase = team.articlebase_set.filter(datasource_id=datasource.id, external_id=order_id, removed=False).only('id', 'name').first()
 
-        if orderbase is None:
+        if articlebase is None:
             return JsonResponse({'result': False})
 
         tag_id = data.get('tag_id', None)
@@ -255,6 +240,6 @@ class ArticleDetailView(
         except ValueTag.DoesNotExist:
             return JsonResponse({'result': False})
 
-        TagAssigner.remove_tag(tag=tag, target=orderbase)
+        TagAssigner.remove_tag(tag=tag, target=articlebase)
 
         return JsonResponse({'result': True})

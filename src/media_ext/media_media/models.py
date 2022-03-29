@@ -1,3 +1,4 @@
+from django.urls import reverse
 import html2text
 from uuid import uuid4
 
@@ -106,6 +107,10 @@ class ArticleBase(BaseModel):
             clientbase = readbase.clientbase
 
         return clientbase
+
+    def get_detail_url(self):
+
+        return reverse('media:article-detail', kwargs={'uuid': self.uuid})
 
 
 @media_ext.ClientModel

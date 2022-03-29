@@ -163,7 +163,7 @@
                         <button class="btn btn-yellow heading-btn btn-search" id="btn-search">{% trans "開始查詢" %}</button>
                     </div>
                     <div class="col-md-6 text-right">
-                        <a type="button" class="btn btn-gray heading-btn text-white" id="btn-clean" href="{% url 'team:articles' %}">{% trans "清除全部條件" %}</a>
+                        <a type="button" class="btn btn-gray heading-btn text-white" id="btn-clean" href="{% url 'media:articles' %}">{% trans "清除全部條件" %}</a>
                     </div>
                 </div>
 
@@ -216,7 +216,7 @@
                                     <div class="col-md-12">
 
                                         <legend class="mt-10 text-muted">
-                                            <a href="{% url 'datahub:mapping_list_status' %}" target="_blank" class="text-info"><u>{% trans "文章狀態" %}</u></a>
+                                            {% trans "文章狀態" %}
                                         </legend>
 
                                         <div class="mt-10 mr-10 text-size-small" style="position: absolute; right:0; top:10px">
@@ -265,12 +265,6 @@
                                         <legend class="mt-10 text-muted">{% trans "排序方式" %}</legend>
 
                                         <ul class="list-unstyled">
-
-                                            <li>
-                                                <input class="styled radio-element" type="radio" name="article-type" value="amount" id="article-amount" {% if view.article_type == 'amount' %}checked=""{% endif %}>
-
-                                                <label class="ml-10 mb-0" for="article-amount" style="cursor:pointer">{% trans "總金額" %}</label>
-                                            </li>
 
                                             <li>
                                                 <input class="styled radio-element" type="radio" name="article-type" value="purchase_date" id="article-purchase_date" {% if view.article_type == 'purchase_date' %}checked=""{% endif %}>
