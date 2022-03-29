@@ -37,7 +37,7 @@
                                 <th class="col-md-2 text-left">{% trans "狀態" %}</th>
                                 <th class="col-md-2 text-center">{% trans "作者" %}</th>
                                 <th class="col-md-2 text-center">{% trans "發布日" %}</th>
-                                <th class="col-md-3 text-left">{% trans "訂購人" %}</th>
+                                <th class="col-md-3 text-left">{% trans "最近讀者" %}</th>
                                 <th class="col-md-1 text-right">{% trans "文長" %}</th>
                             </thead>
 
@@ -70,48 +70,37 @@
 
                                         {# 發布日期 #}
                                         <td class="text-center">
-                                            {% if articlebase.status == 'CONFIRMED' %}
+                                            {% if articlebase.status == articlebase.STATE_PUBLISHED %}
                                                 {{ articlebase.datetime|date:"Y-m-d" }}<br>
                                             {% else %}
                                                 {% trans "未發布" %}
                                             {% endif %}
                                         </td>
 
-                                        {# 訂購人 #}
+                                        {# 最近讀者 #}
+                                        {% with articlebase.get_latest_reader as reader %}
                                         <td class="text-left">
 
-                                            {% if articlebase.purchaser_name != "" %}
+                                            {% if reader %}
 
                                                 <div>
                                                     <a href="{{articlebase.clientbase.get_detail_url}}" target="_blank">
-                                                    {{ articlebase.purchaser_name }}
+                                                        {{ reader.name }}
                                                     </a>
                                                 </div>
-                                                <div>{{ articlebase.get_masked_purchaser_email }}</div>
-                                                <div>{{ articlebase.get_masked_purchaser_contact_phone }}</div>
+                                                <div>{{ reader.get_masked_email }}</div>
+                                                <div>{{ reader.get_masked_contact_phone }}</div>
 
                                             {% else %}
 
                                                 <div>
-                                                    <a href="{{articlebase.clientbase.get_detail_url}}" target="_blank">
-                                                    {% if articlebase.clientbase.name %}
-                                                    {{ articlebase.clientbase.name }}
-                                                    {% else%}
                                                     --
-                                                    {% endif %}
-                                                    </a>
                                                 </div>
-                                                {% if articlebase.clientbase.email %}
-                                                    <div>{{ articlebase.clientbase.get_masked_email }}</div>
-                                                {% endif %}
-                                                {% if articlebase.clientbase.get_masked_contact_phone %}
-                                                    <div>{{ articlebase.clientbase.get_masked_contact_phone }}</div>
-                                                {% endif %}
 
                                             {% endif %}
 
                                         </td>
-
+                                        {% endwith %}
                                         {# 文長 #}
                                         <td class="text-right">
                                             <div class="h5" id="op_{{ articlebase.external_id }}_total_price">{{ articlebase.get_pure_text_count }} 字</div>
@@ -139,9 +128,7 @@
                                                 </div>
 
                                                 <div class="panel-body" style="display: none;">
-
-                                                    {{ articlebase.content|safe }}
-
+                                                    <iframe srcDoc="{{articlebase.content}}" width="100%" height="100%" frameBorder="0"></iframe>
                                                 </div>
 
                                             </div>
@@ -205,14 +192,14 @@
 
                                 <div class="row">
 
-                                    {# 訂單編號查詢 #}
+                                    {# 文章編號查詢 #}
                                     <div class="col-md-12">
-                                        <legend class="text-muted">{% trans "訂單編號查詢，可用 , 隔開關鍵字" %}</legend>
+                                        <legend class="text-muted">{% trans "文章編號查詢，可用 , 隔開關鍵字" %}</legend>
                                     </div>
 
                                     <div class="col-md-10">
                                         <div class="form-group">
-                                            <input type="text" class="form-control" name="search-key" id="serach-key" placeholder="{% trans "輸入訂單編號" %}" search-type="clients" autofocus>
+                                            <input type="text" class="form-control" name="search-key" id="serach-key" placeholder="{% trans "輸入文章編號" %}" search-type="clients" autofocus>
 
                                         </div>
                                     </div>
@@ -225,11 +212,11 @@
                                     </div>
 
 
-                                    {# 訂單狀態 #}
+                                    {# 文章狀態 #}
                                     <div class="col-md-12">
 
                                         <legend class="mt-10 text-muted">
-                                            <a href="{% url 'datahub:mapping_list_status' %}" target="_blank" class="text-info"><u>{% trans "訂單狀態" %}</u></a>
+                                            <a href="{% url 'datahub:mapping_list_status' %}" target="_blank" class="text-info"><u>{% trans "文章狀態" %}</u></a>
                                         </legend>
 
                                         <div class="mt-10 mr-10 text-size-small" style="position: absolute; right:0; top:10px">
@@ -249,9 +236,9 @@
                                         {% endfor %}
                                     </div>
 
-                                    {# 訂單來源 #}
+                                    {# 文章來源 #}
                                     <div class="col-md-12">
-                                        <legend class="text-muted mt-10">{% trans "訂單來源" %}</legend>
+                                        <legend class="text-muted mt-10">{% trans "文章來源" %}</legend>
 
                                         <div class="mt-10 mr-10 text-size-small" style="position: absolute; right:0; top:10px">
                                             <a href="#" class="list_operation" data-action="select_all" data-target="source">{% trans "全選" %}</a> / <a href="#" class="list_operation" data-action="cancle_all" data-target="source">{% trans "取消" %}</a>

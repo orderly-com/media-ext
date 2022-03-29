@@ -11,10 +11,6 @@ from core.models import BaseModel
 
 from ..extension import media_ext
 
-@media_ext.OrderModel
-class ReadBase(OrderBase):
-    pass
-
 
 @media_ext.ProductModel
 class PageBase(ProductBase):
@@ -63,9 +59,9 @@ class ArticleBase(BaseModel):
     content = models.TextField(blank=False)
 
     STATE_DRAFT = 'draft'
-    STATE_PUBLISHED = 'schedule'
-    STATE_PRIVATE = 'sending'
-    STATE_UNSET = 'completed'
+    STATE_PUBLISHED = 'published'
+    STATE_PRIVATE = 'private'
+    STATE_UNSET = 'unset'
 
     # discard soon
     STATE_CHOICES = (
@@ -103,8 +99,21 @@ class ArticleBase(BaseModel):
 
         return len(text)
 
+    def get_latest_reader(self):
+        clientbase = None
+        readbase = self.readbase_set.order_by('-c_at').first()
+        if readbase:
+            clientbase = readbase.clientbase
+
+        return clientbase
+
 
 @media_ext.ClientModel
 class Reader(ClientBase):
     class Meta:
         proxy = True
+
+
+@media_ext.OrderModel
+class ReadBase(OrderBase):
+    articlebase = models.ForeignKey(ArticleBase, blank=False, on_delete=models.CASCADE)

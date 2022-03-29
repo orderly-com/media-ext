@@ -27,6 +27,7 @@ class MediaList:
 
     class ArticleList:
         name = '文章列表'
+        menu_name = 'articles'
         url = '/media/articlelist/'
 
 
@@ -45,7 +46,7 @@ class ArticleListView(
     team_auth_permission = TeamAuthPermission.ORDER_LIST_VIEW
 
     MENU = 'team'
-    SIDEBAR_MENU = 'orders'
+    SIDEBAR_MENU = 'articles'
 
     def get_queryset(self):
 

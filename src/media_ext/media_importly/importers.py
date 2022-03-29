@@ -18,7 +18,7 @@ class ArticleDataTransfer:
         title = Formatted(str, 'title')
         content = Formatted(str, 'content')
 
-        # status = Formatted(str, 'status')
+        status = Formatted(str, 'status')
 
         datetime = Formatted(format_datetime, 'datetime')
 
@@ -40,7 +40,7 @@ class ArticleImporter(DataImporter):
 
         for article in self.datalist.article_set.values(
             'id', 'external_id', 'title',
-            'content', 'attributions', 'datetime', 'author'
+            'content', 'attributions', 'datetime', 'author', 'status'
         ):
             if article['external_id'] in articlebase_map:
                 articlebase = articlebase_map.get(article['external_id'])
@@ -55,11 +55,12 @@ class ArticleImporter(DataImporter):
             articlebase.attributions = article['attributions']
             articlebase.datetime = article['datetime']
             articlebase.author = article['author']
+            articlebase.status = article['status']
 
             article_reverse_link_map[article['id']] = articlebase
 
         ArticleBase.objects.bulk_create(articlebases_to_create, batch_size=settings.BATCH_SIZE_M)
-        update_fields = ['title', 'content', 'attributions', 'datetime', 'author']
+        update_fields = ['title', 'content', 'attributions', 'datetime', 'author', 'status']
         ArticleBase.objects.bulk_update(articlebases_to_update, update_fields, batch_size=settings.BATCH_SIZE_M)
 
         articles_to_create = [

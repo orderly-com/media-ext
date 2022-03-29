@@ -33,6 +33,8 @@ class Article(RawModel):
     title = models.CharField(max_length=128)
     content = models.TextField(blank=False)
 
+    status = models.CharField(max_length=64, default=str)
+
     removed = models.BooleanField(default=False)
 
     datasource = models.ForeignKey(DataSource, blank=False, default=1, on_delete=models.CASCADE)
