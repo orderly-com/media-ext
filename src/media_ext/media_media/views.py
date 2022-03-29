@@ -18,7 +18,7 @@ from .models import ArticleBase
 
 from ..extension import media_ext
 
-media_router = media_ext.router('media/')
+media_router = media_ext.router('team')
 
 @media_ext.sidebar_item('team')
 class MediaList:
@@ -31,7 +31,7 @@ class MediaList:
         url = '/media/articlelist/'
 
 
-@media_router.view('articlelist/', name='article-list')
+@media_router.view('articlelist/', name='articles')
 class ArticleListView(
         core.LoginRequiredMixin, core.TeamRequiredMixin,
         core.SetDefaultBreadCrumbMixin, core.SetDefaultPageContent,
