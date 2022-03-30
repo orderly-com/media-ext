@@ -71,13 +71,6 @@
                         <tr class="row">
                             <td>{% trans "發布日期" %}</td>
                             <td>
-                                {{ articlebase.datetime|date:"Y-m-d H:i:s" }}
-                            </td>
-                        </tr>
-
-                        <tr class="row">
-                            <td>{% trans "發布日期" %}</td>
-                            <td>
                                 {% if articlebase.datetime %}
                                     {{ articlebase.datetime|date:"Y-m-d" }}
                                 {% else %}
@@ -101,7 +94,7 @@
                 <div class="panel panel-white">
 
                     <div class="panel-heading">
-                        <h5 class="panel-title">{% trans "屬性與狀態" %} ({{articlebase.attributions.count}})</h5>
+                        <h5 class="panel-title">{% trans "屬性與狀態" %} ({{ articlebase.attributions|length }})</h5>
                         <div class="heading-elements"></div>
                     </div>
 
@@ -114,9 +107,19 @@
 
             </div>
 
-            {# middle section #}
-            <div class="col-md-12">
+            <div class="col-md-8">
+                <div class="panel panel-white">
+                    <div class="panel-heading">
+                        <h5 class="panel-title">{% trans "內容" %} ({{ articlebase.get_pure_text_count }})</h5>
+                        <div class="heading-elements"></div>
+                    </div>
 
+                    <div class="panel-body">
+                        <div class="row">
+                            <iframe srcDoc="{{articlebase.content}}" width="100%" height="500px" frameBarticle="0"></iframe>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>

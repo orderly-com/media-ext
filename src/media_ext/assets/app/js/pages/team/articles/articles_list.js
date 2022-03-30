@@ -116,7 +116,7 @@ $(function() {
 
         var recursiveEncoded = $.param(params);
 
-        window.location = "/media/articlelist/?"+recursiveEncoded
+        window.location = "/media/articles/?"+recursiveEncoded
 
     })
 

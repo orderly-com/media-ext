@@ -229,8 +229,8 @@
                                         {% for status in status_list %}
                                             <div class="checkbox article-status">
                                                 <label>
-                                                    <input type="checkbox" class="styled" name="status" value="{{ status }}" {% if status.key in enabled_status_list %}checked{% endif %}>
-                                                    &nbsp;&nbsp;{{ status.localization.zh_tw }}
+                                                    <input type="checkbox" class="styled" name="status" value="{{ status.key }}" {% if status.key in enabled_status_list %}checked{% endif %}>
+                                                    &nbsp;&nbsp;{{ status.name }}
                                                 </label>
                                             </div>
                                         {% endfor %}
@@ -267,33 +267,18 @@
                                         <ul class="list-unstyled">
 
                                             <li>
-                                                <input class="styled radio-element" type="radio" name="article-type" value="purchase_date" id="article-purchase_date" {% if view.article_type == 'purchase_date' %}checked=""{% endif %}>
+                                                <input class="styled radio-element" type="radio" name="article-type" value="author" id="article-author" {% if view.article_type == 'author' %}checked=""{% endif %}>
 
-                                                <label class="ml-10 mb-0" for="article-purchase_date" style="cursor:pointer">{% trans "作者" %}</label>
+                                                <label class="ml-10 mb-0" for="article-author" style="cursor:pointer">{% trans "作者" %}</label>
                                             </li>
 
                                             <li>
-                                                <input class="styled radio-element" type="radio" name="article-type" value="delivery_date" id="article-delivery_date" {% if view.article_type == 'delivery_date' %}checked=""{% endif %}>
+                                                <input class="styled radio-element" type="radio" name="article-type" value="datetime" id="article-datetime" {% if view.article_type == 'datetime' %}checked=""{% endif %}>
 
-                                                <label class="ml-10 mb-0" for="article-delivery_date" style="cursor:pointer">{% trans "發布日" %}</label>
+                                                <label class="ml-10 mb-0" for="article-deliverdatetimey_date" style="cursor:pointer">{% trans "發布日" %}</label>
                                             </li>
 
                                         </ul>
-
-                                    </div>
-
-
-                                    {# 進階條件 #}
-                                    <div class="col-md-12">
-                                        <legend class="text-muted mt-10">{% trans "進階條件" %}</legend>
-
-                                        {# 品項變動過 #}
-                                        <div class="checkbox">
-                                            <label>
-                                                <input type="checkbox" class="styled" id="product_changed" value="1" {% if product_changed == 1 %}checked{% endif %}>
-                                                <span class="ml-5">{% trans "品項變動過" %}</span>
-                                            </label>
-                                        </div>
 
                                     </div>
 

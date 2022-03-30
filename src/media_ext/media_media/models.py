@@ -109,8 +109,10 @@ class ArticleBase(BaseModel):
         return clientbase
 
     def get_detail_url(self):
-
         return reverse('media:article-detail', kwargs={'uuid': self.uuid})
+
+    def get_records_url(self):
+        return reverse('media:article-records', kwargs={'uuid': self.uuid})
 
 
 @media_ext.ClientModel

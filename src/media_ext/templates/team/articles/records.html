@@ -1,0 +1,138 @@
+{% extends "base/app/base.html" %}
+{% load static thumbnail humanize _filters _article_filter i18n %}
+
+{% comment %}
+{% block title %}{{ app.get_title }}:{{ app.short_description }}{% endblock title %}
+{% endcomment %}
+
+{% block app_css %}{% endblock app_css%}
+
+
+{% block app_js %}
+    <script type="text/javascript" src="{% static "app/js/pages/team/articles/articles.js" %}?version={{STATIC_VERSION}}" ></script>
+{% endblock app_js%}
+
+{% block sidebar %}
+    {% include "../_sidebar.html" %}
+{% endblock sidebar %}
+
+{% block content %}
+
+    <!-- Content area -->
+    <div class="content">
+
+        {% csrf_token %}
+
+        {% include "../_dataview_control_bar.html" with detail_url=articlebase.get_detail_url analytics_url=articlebase.get_analytics_url records_url=articlebase.get_records_url enable_analytics=False %}
+
+        <div class="row">
+
+            {# middle section #}
+            <div class="col-md-12">
+
+                {# 閱讀紀錄 #}
+                <div class="panel panel-white">
+
+                    <div class="panel-heading">
+                        <h5 class="panel-title">閱讀紀錄 ({{ readbases|length }})</h5>
+                        <div class="heading-elements"></div>
+                    </div>
+
+                    <div class="table-active">
+
+                        <table class="table text-left">
+
+                            <thead>
+                                <tr class="row">
+                                    <th class="col-md-1">狀態</th>
+                                    <th class="col-md-3">編號</th>
+                                    <th class="col-md-5">名稱</th>
+                                    <th class="col-md-1"><div class="text-right">單價</div></th>
+                                    <th class="col-md-1"><div class="text-right">個數</div></th>
+                                    <th class="col-md-1"><div class="text-right">小計</div></th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for readbase in readbases %}
+
+                                    <tr class="row">
+                                        {# 狀態 #}
+                                        <td>
+
+                                            {% if readbase.productbase.internal_product %}
+
+                                                <span class="label label-yellow">內部商品</span>
+
+                                            {% else %}
+
+                                                {% if articlebase.status_key == "CONFIRMED" %}
+
+                                                    {% if readbase.refound is True %}
+                                                        <span class="label label-danger">退貨</span>&nbsp;&nbsp;
+                                                    {% else %}
+                                                        <span class="label label-primary">確認</span>&nbsp;&nbsp;
+                                                        {% if readbase.append is True %}
+                                                        <span class="label label-yellow">新出</span>&nbsp;&nbsp;
+                                                        {% endif %}
+                                                    {% endif %}
+
+                                                {% elif articlebase.status_key == "ABANDONED" %}
+                                                    <span class="label label-muted">取消</span>
+                                                {% else%}
+                                                    <span class="label label-info">處理中</span>
+                                                {% endif %}
+
+                                            {% endif %}
+
+                                        </td>
+
+                                        {# 編號 #}
+                                        <td>
+                                            <a href="{{ readbase.productbase.get_detail_url }}" target="_blank">{{readbase.external_id}}</a>
+                                        </td>
+
+                                        {# 名稱 #}
+                                        <td>
+                                            <a href="{{ readbase.productbase.get_detail_url }}" target="_blank">{{readbase.name}}</a>
+                                        </td>
+
+                                        {# 單價 #}
+                                        <td>
+                                            <div class="text-right">
+                                                <span class="text-muted text-size-small">$</span> {{ readbase.price|floatformat:0|int_format }}
+                                            </div>
+                                        </td>
+
+                                        {# 個數 #}
+                                        <td>
+                                            <div class="text-right">{{ readbase.quantity|floatformat:0|int_format }}</div>
+                                            {% if readbase.quantity < 0 %}
+                                                <div class="label label-danger">退回</div>
+                                            {% endif %}
+                                            </div>
+                                        </td>
+
+                                        {# 小計 #}
+                                        <td>
+                                            <div class="text-right"><span class="text-muted text-size-small">$</span> {{ readbase.total_price|floatformat:0|int_format }}</div>
+                                        </td>
+                                    </tr>
+
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <!-- /content area -->
+
+{% endblock content %}
