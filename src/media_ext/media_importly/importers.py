@@ -114,13 +114,14 @@ class ReadImporter(DataImporter):
                 articlebase_id = article_title_map[read_data['title']]
             else:
                 articlebase_id = None
-                readbases_to_create.append(
-                    ReadBase(
-                        articlebase_id=articlebase_id,
-                        datetime=read_data['datetime'],
-                        attributions=read_data['attributions'],
-                        team=self.team,
-                        datasource=self.datasource
-                    )
+
+            readbases_to_create.append(
+                ReadBase(
+                    articlebase_id=articlebase_id,
+                    datetime=read_data['datetime'],
+                    attributions=read_data['attributions'],
+                    team=self.team,
+                    datasource=self.datasource
                 )
+            )
         ReadBase.objects.bulk_create(readbases_to_create, batch_size=settings.BATCH_SIZE_M)
