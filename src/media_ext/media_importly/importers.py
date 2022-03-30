@@ -65,8 +65,8 @@ class ArticleImporter(DataImporter):
 
         articles_to_create = [
             Article(
-                id=article_id, articlebase_id=articlebase.id
-            ) for article_id, articlebase in article_reverse_link_map.items()
+                id=articlebase_id, articlebase_id=articlebase.id
+            ) for articlebase_id, articlebase in article_reverse_link_map.items()
         ]
 
         Article.objects.bulk_update(articles_to_create, ['articlebase_id'], batch_size=settings.BATCH_SIZE_M)
@@ -109,16 +109,16 @@ class ReadImporter(DataImporter):
 
         for read_data in self.datalist.read_set.values('path', 'title', 'id', 'datetime', 'attributions'):
             if read_data['path'] in article_path_map:
-                article_id = article_path_map[read_data['path']]
+                articlebase_id = article_path_map[read_data['path']]
             elif read_data['path'] in article_path_map:
-                article_id = article_title_map[read_data['title']]
+                articlebase_id = article_title_map[read_data['title']]
             else:
-                article_id = None
+                articlebase_id = None
                 readbases_to_create.append(
                     ReadBase(
-                        article_id=article_id,
+                        articlebase_id=articlebase_id,
                         datetime=read_data['datetime'],
-                        attribution=read_data['attributions'],
+                        attributions=read_data['attributions'],
                         team=self.team,
                         datasource=self.datasource
                     )

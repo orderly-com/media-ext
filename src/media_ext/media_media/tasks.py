@@ -15,7 +15,7 @@ from ..extension import media_ext
 def sync_reading_data(*args, **kwargs):
     for team in Team.objects.all():
         params = {}
-        datasource = team.datasource_set.get_or_create(name='system')
+        datasource, created = team.datasource_set.get_or_create(name='system')
         last_sync = team.datasync_set.filter(data_type=data_types.SYNC_READING_DATA).order_by('-datetime').first()
         if last_sync:
             params['from_datetime'] = last_sync.datetime
