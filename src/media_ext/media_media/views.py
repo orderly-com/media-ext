@@ -250,6 +250,7 @@ class ArticleDetailRecordsView(
         core.LoginRequiredMixin, core.TeamRequiredMixin,
         core.SetDefaultBreadCrumbMixin, core.SetDefaultPageContent,
         core.GetGuidanceMixin,
+        TeamMixin,
         TemplateView):
 
     template_name = 'team/articles/records.html'

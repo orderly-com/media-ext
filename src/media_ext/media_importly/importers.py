@@ -5,8 +5,8 @@ from importly.formatters import (
     Formatted, format_datetime
 )
 
-from ..media_media.models import ArticleBase, ArticleCategory
-from .models import Article
+from ..media_media.models import ArticleBase, ArticleCategory, ReadBase
+from .models import Article, Read
 
 class ArticleDataTransfer:
     class ArticleTransfer:
@@ -83,3 +83,44 @@ class ArticleImporter(DataImporter):
                     article_category.save(update_fields=['name'])
 
                 article.articlebase.categories.add(article_category)
+
+
+class ReadDataTransfer:
+    class ReadTransfer:
+        model = Read
+
+        title = Formatted(str, 'title')
+        path = Formatted(str, 'path')
+
+        datetime = Formatted(format_datetime, 'datetime')
+
+        attributions = Formatted(dict, 'attributions')
+
+
+class ReadImporter(DataImporter):
+    def process_raw_records(self):
+        article_path_map = {}
+        article_title_map = {}
+        for articlebase in self.team.articlebase_set.values('path', 'title', 'id'):
+            article_path_map[articlebase['path']] = articlebase['id']
+            article_title_map[articlebase['title']] = articlebase['id']
+
+        readbases_to_create = []
+
+        for read_data in self.datalist.read_set.values('path', 'title', 'id', 'datetime', 'attributions'):
+            if read_data['path'] in article_path_map:
+                article_id = article_path_map[read_data['path']]
+            elif read_data['path'] in article_path_map:
+                article_id = article_title_map[read_data['title']]
+            else:
+                article_id = None
+                readbases_to_create.append(
+                    ReadBase(
+                        article_id=article_id,
+                        datetime=read_data['datetime'],
+                        attribution=read_data['attributions'],
+                        team=self.team,
+                        datasource=self.datasource
+                    )
+                )
+        ReadBase.objects.bulk_create(readbases_to_create, batch_size=settings.BATCH_SIZE_M)

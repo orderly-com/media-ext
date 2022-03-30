@@ -57,6 +57,7 @@ class ArticleBase(BaseModel):
 
     author = models.CharField(max_length=128)
     title = models.CharField(max_length=128)
+    path = models.CharField(max_length=128)
     content = models.TextField(blank=False)
 
     STATE_DRAFT = 'draft'
@@ -123,4 +124,7 @@ class Reader(ClientBase):
 
 @media_ext.OrderModel
 class ReadBase(OrderBase):
-    articlebase = models.ForeignKey(ArticleBase, blank=False, on_delete=models.CASCADE)
+    articlebase = models.ForeignKey(ArticleBase, blank=False, null=True, on_delete=models.CASCADE)
+    read_rate = models.FloatField(default=1)
+
+    attributions = JSONField(default=dict)

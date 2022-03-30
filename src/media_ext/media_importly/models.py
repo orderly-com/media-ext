@@ -44,3 +44,31 @@ class Article(RawModel):
     categories = ArrayField(JSONField(default=dict), default=list)
 
     articlebase = models.ForeignKey(ArticleBase, blank=True, null=True, on_delete=models.CASCADE)
+
+
+class Read(RawModel):
+    class Meta:
+        indexes = [
+            models.Index(fields=['team', ]),
+            models.Index(fields=['datasource', ]),
+            models.Index(fields=['title', ]),
+
+            models.Index(fields=['team', 'datasource']),
+            models.Index(fields=['team', 'title']),
+        ]
+
+    external_id = models.CharField(max_length=128)
+
+    team = models.ForeignKey(Team, blank=False, on_delete=models.CASCADE)
+
+    datetime = models.DateTimeField(blank=True, null=True)
+
+    # for articlebase
+    title = models.CharField(max_length=128)
+    path = models.CharField(max_length=128)
+
+    removed = models.BooleanField(default=False)
+
+    datasource = models.ForeignKey(DataSource, blank=False, default=1, on_delete=models.CASCADE)
+
+    attributions = JSONField(default=dict)
