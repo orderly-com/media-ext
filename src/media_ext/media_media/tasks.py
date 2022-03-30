@@ -1,7 +1,9 @@
 from cerem.tasks import fetch_site_tracking_data
+from cerem.utils import kafka_headers
 
 from datahub.models import DataSync
 from team.models import Team
+
 
 from ..media_importly.importers import ReadImporter, ReadDataTransfer
 
@@ -22,6 +24,14 @@ def sync_reading_data(*args, **kwargs):
         params['to_datetime'] = datasync.datetime
 
         data = fetch_site_tracking_data(team, **params)
+        data = [
+            {
+                'datetime': row[kafka_headers.DATETIME],
+                'title': row[kafka_headers.TITLE],
+                'path': row[kafka_headers.PATH],
+                'attributions': row[kafka_headers.PARAMS],
+            } for row in data
+        ]
 
         importer = ReadImporter(team, datasource)
 
