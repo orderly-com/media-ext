@@ -116,9 +116,19 @@ class ArticleBase(ProductBase):
 @client_info_model
 class MediaInfo(BaseModel):
 
-    clientbase = models.ForeignKey(ClientBase, related_name='media_info', blank=False, on_delete=models.CASCADE)
+    clientbase = models.OneToOneField(ClientBase, related_name='media_info', blank=False, on_delete=models.CASCADE)
 
     def get_sum_of_total_read(self):
+        qs = self.clientbase.readbase_set.filter(removed=False)
+
+        data = qs.aggregate(total_read_rate=Sum('read_rate'))
+        total_read_rate = data.get('total_read_rate', 0)
+        if total_read_rate is None:
+            total_read_rate = 0
+
+        return total_read_rate
+
+    def get_count_of_total_article(self):
         return self.clientbase.readbase_set.filter(removed=False).values('path').count()
 
     def get_avg_of_each_read(self):
@@ -131,6 +141,8 @@ class MediaInfo(BaseModel):
 
         return total_read_rate / qs.count()
 
+    def get_times_of_read(self):
+        return self.clientbase.readbase_set.filter(removed=False).count()
 
 
 @media_ext.OrderModel

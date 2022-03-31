@@ -1,405 +1,397 @@
 {% load static thumbnail humanize bootstrap_pagination _filters tz i18n %}
 
-<div class="col-md-8">
+<div class="col-md-6">
 
-    <div class="row">
+    {# 瀏覽資訊 #}
+    <div class="panel panel-white">
 
-        <div class="col-md-6">
+        <div class="panel-heading">
+            <h5 class="panel-title">瀏覽資訊</h5>
+            <div class="heading-elements"></div>
+        </div>
 
-            {# 瀏覽資訊 #}
-            <div class="panel panel-white">
+        <table class="table" id="purchase_profile">
 
-                <div class="panel-heading">
-                    <h5 class="panel-title">瀏覽資訊</h5>
-                    <div class="heading-elements"></div>
-                </div>
+            <tr class="row">
+                <td class="col-md-4">瀏覽排名</td>
+                <td class="col-md-8">
+                    {% with clientbase.get_total_spent_rank as total_spent_rank %}
 
-                <table class="table" id="purchase_profile">
+                    {% if total_spent_rank %}
+                        <div class="">
+                            <span>#</span>
+                            <span class="text-semibold text-yellow h1">{{ total_spent_rank|floatformat:0|int_format }}</span>
+                        </div>
+                    {% else %}
+                        <div>--</div>
+                    {% endif %}
 
-                    <tr class="row">
-                        <td class="col-md-4">瀏覽排名</td>
-                        <td class="col-md-8">
-                            {% with clientbase.get_total_spent_rank as total_spent_rank %}
+                    {% endwith %}
 
-                            {% if total_spent_rank %}
-                                <div class="">
-                                    <span>#</span>
-                                    <span class="text-semibold text-yellow h1">{{ total_spent_rank|floatformat:0|int_format }}</span>
-                                </div>
-                            {% else %}
-                                <div>--</div>
-                            {% endif %}
+                </td>
+            </tr>
 
-                            {% endwith %}
+            <tr class="row">
+                <td class="col-md-4">加入時間</td>
+                <td class="col-md-8" id="join_date">
+                    <div class="">{{ clientbase.join_datetime|date:"Y-m-d" }}</div>
+                    <div class="text-muted">約 <span id="join_data">{{ clientbase.join_datetime.isoformat }}</span> 前</div>
+                </td>
+            </tr>
 
-                        </td>
-                    </tr>
+            <tr class="row">
+                <td>首次閱讀</td>
+                <td id="first_purchase_date">
+                    {% if clientbase.first_purchase is not None %}
+                        <div class="">{{ clientbase.first_purchase|date:"Y-m-d" }}</div>
+                        <div class="text-muted">約 <span id="first_purchase_data">{{ clientbase.first_purchase.isoformat }}</span> 前</div>
+                    {% else %}
+                        <div>暫無瀏覽紀錄</div>
+                    {% endif %}
+                </td>
+            </tr>
 
-                    <tr class="row">
-                        <td class="col-md-4">加入時間</td>
-                        <td class="col-md-8" id="join_date">
-                            <div class="">{{ clientbase.join_datetime|date:"Y-m-d" }}</div>
-                            <div class="text-muted">約 <span id="join_data">{{ clientbase.join_datetime.isoformat }}</span> 前</div>
-                        </td>
-                    </tr>
+            <tr class="row">
+                <td>最近閱讀</td>
+                <td id="last_purchase_date">
+                    {% if clientbase.last_purchase is not None %}
+                        <div class="">{{ clientbase.last_purchase|date:"Y-m-d" }}</div>
+                        <div class="text-muted">約 <span id="last_purchase_data">{{ clientbase.last_purchase.isoformat }}</span> 前</div>
+                    {% else %}
+                        <div>暫無瀏覽紀錄</div>
+                    {% endif %}
+                </td>
+            </tr>
 
-                    <tr class="row">
-                        <td>首購時間</td>
-                        <td id="first_purchase_date">
-                            {% if clientbase.first_purchase is not None %}
-                                <div class="">{{ clientbase.first_purchase|date:"Y-m-d" }}</div>
-                                <div class="text-muted">約 <span id="first_purchase_data">{{ clientbase.first_purchase.isoformat }}</span> 前</div>
-                            {% else %}
-                                <div>暫無瀏覽紀錄</div>
-                            {% endif %}
-                        </td>
-                    </tr>
+            <tr class="row">
+                <td>瀏覽次數</td>
+                <td>
+                    <div class="">{{ clientbase.media_info.get_times_of_read }} 次</div>
+                </td>
+            </tr>
 
-                    <tr class="row">
-                        <td>最近購買</td>
-                        <td id="last_purchase_date">
-                            {% if clientbase.last_purchase is not None %}
-                                <div class="">{{ clientbase.last_purchase|date:"Y-m-d" }}</div>
-                                <div class="text-muted">約 <span id="last_purchase_data">{{ clientbase.last_purchase.isoformat }}</span> 前</div>
-                            {% else %}
-                                <div>暫無瀏覽紀錄</div>
-                            {% endif %}
-                        </td>
-                    </tr>
+            <tr class="row">
+                <td>累計瀏覽</td>
+                <td>
+                    <div class="">{{ clientbase.media_info.get_sum_of_total_read|floatformat:2 }} 篇</div>
+                </td>
+            </tr>
 
-                    <tr class="row">
-                        <td>瀏覽次數</td>
-                        <td>
-                            <div class="">{{ clientbase.media_info.get_times_of_read }} 次</div>
-                        </td>
-                    </tr>
+            <tr class="row">
+                <td>平均瀏覽比率</td>
+                <td>
+                    <div class="">{{ clientbase.media_info.get_avg_of_each_read|percent:1 }} %</div>
+                </td>
+            </tr>
 
-                    <tr class="row">
-                        <td>累計瀏覽</td>
-                        <td>
-                            <div class="">{{ clientbase.media_info.get_sum_of_total_read|floatformat:2|int_format }} 頁</div>
-                        </td>
-                    </tr>
+            <tr class="row">
+                <td>回站周期</td>
+                <td>
+                    {% if clientbase.avg_repurchase_days > 0 %}
+                        <div class="">{{ clientbase.media_info.avg_repurchase_days|floatformat:2|int_format }} 天</div>
+                    {% else %}
+                        無瀏覽紀錄
+                    {% endif %}
+                </td>
+            </tr>
 
-                    <tr class="row">
-                        <td>平均瀏覽比率</td>
-                        <td>
-                            <div class="">{{ clientbase.media_info.get_avg_of_each_read|percent:1 }} %</div>
-                        </td>
-                    </tr>
+            <tr class="row">
+                <td>瀏覽文章總數</td>
+                <td>
+                    <div class="">共 {{ clientbase.media_info.get_count_of_total_article }} 篇</div>
+                </td>
+            </tr>
 
-                    <tr class="row">
-                        <td>回購周期</td>
-                        <td>
-                            {% if clientbase.avg_repurchase_days > 0 %}
-                                <div class="">{{ clientbase.media_info.avg_repurchase_days|floatformat:2|int_format }} 天</div>
-                            {% else %}
-                                無回購紀錄
-                            {% endif %}
-                        </td>
-                    </tr>
+        </table>
+    </div>
 
-                    <tr class="row">
-                        <td>文章總數</td>
-                        <td>
-                            <div class="">共 {{ clientbase.media_info.get_count_of_total_article }} 項</div>
-                        </td>
-                    </tr>
+</div>
 
-                </table>
-            </div>
+<div class="col-md-6">
+
+
+    {# 瀏覽分析 #}
+    <div class="panel panel-white">
+
+        <div class="panel-heading">
+            <h5 class="panel-title">瀏覽分析</h5>
+            <div class="heading-elements"></div>
+        </div>
+
+        <div class="panel-body text-center">
+
+            <div class="text-semibold text-yellow h1">{{ clientbase.get_fast_segmentation|display_fast_segmentation }}</div>
 
         </div>
 
-        <div class="col-md-6">
+        <table class="table">
+
+            <tr class="row">
+                <td class="col-md-4">
+                    RFM 得分
+                    <a href="https://wiki.mbalib.com/zh-tw/RFM%E6%A8%A1%E5%9E%8B" target="_bank"><i class="icon-info22 text-muted ml-5"></i></a>
+
+                </td>
+                <td class="col-md-8">
+                    {% if clientbase.rfm_total_score != -1 %}
+                        <div class="text-semibold">{{clientbase.rfm_total_score}}</div>
+                    {% else %}
+                        暫無分數
+                    {% endif %}
+                </td>
+            </tr>
+
+            <tr class="row">
+                <td>(R) 時間分數</td>
+                <td>
+                    {% if clientbase.rfm_total_score != -1 %}
+                        <div class="text-semibold">{{clientbase.rfm_recency}}</div>
+                    {% else %}
+                        --
+                    {% endif %}
+                </td>
+            </tr>
+
+            <tr class="row">
+                <td>(F) 頻率分數</td>
+                <td>
+                    {% if clientbase.rfm_total_score != -1 %}
+                        <div class="text-semibold">{{clientbase.rfm_frequency}}</div>
+                    {% else %}
+                        --
+                    {% endif %}
+                </td>
+            </tr>
+
+            <tr class="row">
+                <td>(M) 瀏覽分數</td>
+                <td>
+                    {% if clientbase.rfm_total_score != -1 %}
+                        <div class="text-semibold">{{clientbase.rfm_monetary}}</div>
+                    {% else %}
+                        --
+                    {% endif %}
+                </td>
+            </tr>
+
+            <tr class="row">
+                <td>跨通路購買</td>
+                <td>
+                    {% if clientbase.is_cross_datasources %}
+                        [ <span class="text-yellow text-bold">是</span> / <span class="text-muted">否</span> ]
+                    {% else %}
+                        [ <span class="text-muted">是</span> /  <span class="text-yellow text-bold">否</span> ]
+                    {% endif %}
+                </td>
+            </tr>
+
+            <tr class="row">
+                <td>跨品項購買</td>
+                <td>
+                    {% if clientbase.is_cross_productbases%}
+                        [ <span class="text-yellow text-bold">是</span> / <span class="text-muted">否</span> ]
+                    {% else %}
+                        [ <span class="text-muted">是</span> /  <span class="text-yellow text-bold">否</span>]
+                    {% endif %}
+                </td>
+            </tr>
+
+            <tr class="row">
+                <td>折扣敏感型</td>
+                <td>
+                    {% with clientbase.get_discount_sensitive as sensitive_level %}
+
+                        [
+                            <span class="{% if sensitive_level == 0 %}text-yellow text-bold{%else%}text-muted{% endif %}">低</span> /
+                            <span class="{% if sensitive_level == 1 %}text-yellow text-bold{%else%}text-muted{% endif %}">中</span> /
+                            <span class="{% if sensitive_level == 2 %}text-yellow text-bold{%else%}text-muted{% endif %}">高</span>
+                        ]
+
+                    {% endwith %}
+
+                </td>
+            </tr>
 
 
-            {# 瀏覽分析 #}
-            <div class="panel panel-white">
+        </table>
 
-                <div class="panel-heading">
-                    <h5 class="panel-title">瀏覽分析</h5>
-                    <div class="heading-elements"></div>
-                </div>
+    </div>
 
-                <div class="panel-body text-center">
+</div>
 
-                    <div class="text-semibold text-yellow h1">{{ clientbase.get_fast_segmentation|display_fast_segmentation }}</div>
-
-                </div>
-
-                <table class="table">
-
-                    <tr class="row">
-                        <td class="col-md-4">
-                            RFM 得分
-                            <a href="https://wiki.mbalib.com/zh-tw/RFM%E6%A8%A1%E5%9E%8B" target="_bank"><i class="icon-info22 text-muted ml-5"></i></a>
-
-                        </td>
-                        <td class="col-md-8">
-                            {% if clientbase.rfm_total_score != -1 %}
-                                <div class="text-semibold">{{clientbase.rfm_total_score}}</div>
-                            {% else %}
-                                暫無分數
-                            {% endif %}
-                        </td>
-                    </tr>
-
-                    <tr class="row">
-                        <td>(R) 時間分數</td>
-                        <td>
-                            {% if clientbase.rfm_total_score != -1 %}
-                                <div class="text-semibold">{{clientbase.rfm_recency}}</div>
-                            {% else %}
-                                --
-                            {% endif %}
-                        </td>
-                    </tr>
-
-                    <tr class="row">
-                        <td>(F) 頻率分數</td>
-                        <td>
-                            {% if clientbase.rfm_total_score != -1 %}
-                                <div class="text-semibold">{{clientbase.rfm_frequency}}</div>
-                            {% else %}
-                                --
-                            {% endif %}
-                        </td>
-                    </tr>
-
-                    <tr class="row">
-                        <td>(M) 瀏覽分數</td>
-                        <td>
-                            {% if clientbase.rfm_total_score != -1 %}
-                                <div class="text-semibold">{{clientbase.rfm_monetary}}</div>
-                            {% else %}
-                                --
-                            {% endif %}
-                        </td>
-                    </tr>
-
-                    <tr class="row">
-                        <td>跨通路購買</td>
-                        <td>
-                            {% if clientbase.is_cross_datasources %}
-                                [ <span class="text-yellow text-bold">是</span> / <span class="text-muted">否</span> ]
-                            {% else %}
-                                [ <span class="text-muted">是</span> /  <span class="text-yellow text-bold">否</span> ]
-                            {% endif %}
-                        </td>
-                    </tr>
-
-                    <tr class="row">
-                        <td>跨品項購買</td>
-                        <td>
-                            {% if clientbase.is_cross_productbases%}
-                                [ <span class="text-yellow text-bold">是</span> / <span class="text-muted">否</span> ]
-                            {% else %}
-                                [ <span class="text-muted">是</span> /  <span class="text-yellow text-bold">否</span>]
-                            {% endif %}
-                        </td>
-                    </tr>
-
-                    <tr class="row">
-                        <td>折扣敏感型</td>
-                        <td>
-                            {% with clientbase.get_discount_sensitive as sensitive_level %}
-
-                                [
-                                    <span class="{% if sensitive_level == 0 %}text-yellow text-bold{%else%}text-muted{% endif %}">低</span> /
-                                    <span class="{% if sensitive_level == 1 %}text-yellow text-bold{%else%}text-muted{% endif %}">中</span> /
-                                    <span class="{% if sensitive_level == 2 %}text-yellow text-bold{%else%}text-muted{% endif %}">高</span>
-                                ]
-
-                            {% endwith %}
-
-                        </td>
-                    </tr>
+<div class="col-md-12">
 
 
-                </table>
+    {# 智能貼標 #}
+    <div class="panel panel-white">
 
-            </div>
+        {% with clientbase.get_value_tags as value_tags %}
+
+        <div class="panel-heading">
+            <h5 class="panel-title">智能貼標 ({{ value_tags|length }})</h5>
+            <div class="heading-elements"></div>
+        </div>
+
+        <div class="panel-body tags">
+
+            {% for value_tag in value_tags %}
+                {% if value_tag.tag_type == MANUAL_TAG %}
+                    <a class="mr-20 mb-10 tag-secondary" tag-id="{{ value_tag.uuid }}" data-text="{{value_tag.name}}" href="{% url 'tag_assigner:detail' value_tag.uuid %}" target="_blank">{{ value_tag.name }}<i class="icon-cross3 ml-5 remove-tag text-danger-400"></i></a>
+                {% else %}
+                    <a class="mr-20 mb-10 tag-primary" tag-id="{{ value_tag.uuid }}" href="{% url 'tag_assigner:detail' value_tag.uuid %}" data-text="{{value_tag.name}}" target="_blank">{{ value_tag.name }}</a>
+                {% endif %}
+            {% endfor %}
 
         </div>
 
-        <div class="col-md-12">
+        {% endwith %}
 
+    </div>
 
-            {# 智能貼標 #}
-            <div class="panel panel-white">
+    {# 購買偏好 #}
+    <div class="panel panel-white">
 
-                {% with clientbase.get_value_tags as value_tags %}
+        {% with clientbase.get_productbase_list_has_bought as productbase_list %}
 
-                <div class="panel-heading">
-                    <h5 class="panel-title">智能貼標 ({{ value_tags|length }})</h5>
-                    <div class="heading-elements"></div>
-                </div>
+        <div class="panel-heading">
+            <h5 class="panel-title">購買偏好 ({{ productbase_list|length }})</h5>
+            <div class="heading-elements"></div>
+        </div>
 
-                <div class="panel-body tags">
+        <table class="table">
 
-                    {% for value_tag in value_tags %}
-                        {% if value_tag.tag_type == MANUAL_TAG %}
-                            <a class="mr-20 mb-10 tag-secondary" tag-id="{{ value_tag.uuid }}" data-text="{{value_tag.name}}" href="{% url 'tag_assigner:detail' value_tag.uuid %}" target="_blank">{{ value_tag.name }}<i class="icon-cross3 ml-5 remove-tag text-danger-400"></i></a>
-                        {% else %}
-                            <a class="mr-20 mb-10 tag-primary" tag-id="{{ value_tag.uuid }}" href="{% url 'tag_assigner:detail' value_tag.uuid %}" data-text="{{value_tag.name}}" target="_blank">{{ value_tag.name }}</a>
-                        {% endif %}
-                    {% endfor %}
+            <thead class="">
+                <tr class="row">
+                    <th class="col-md-3"></th>
+                    <th class="col-md-7">品名</th>
+                    <th class="col-md-2 text-right">個數</th>
+                </tr>
+            </thead>
 
-                </div>
+            <tbody>
 
-                {% endwith %}
+                {% for product in productbase_list %}
 
+                    <tr class="row">
+                        <td class="">
+                            <span class="text-muted text-size-small mr-10">#{{forloop.counter}}</span>
+                            <a href="{{product.url}}" target="_blank">{{product.external_id}}</a>
+                        </td>
+                        <td class=""><a href="{{product.url}}" target="_blank">{{product.name}}</a></td>
+                        <td class="text-right">{{product.count}}</td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+        {% endwith %}
+
+    </div>
+
+    {# Facebook 評論 #}
+    {% with clientbase.get_facebook_review as facebook_review %}
+
+    {% if facebook_review %}
+
+        <div class="panel panel-white">
+
+            <div class="panel-heading">
+                <h5 class="panel-title">{% trans "Facebook 評論" %}</h5>
+                <div class="heading-elements"></div>
             </div>
 
-            {# 購買偏好 #}
-            <div class="panel panel-white">
+            <table class="table text-size-small">
 
-                {% with clientbase.get_productbase_list_has_bought as productbase_list %}
+                <tbody>
 
-                <div class="panel-heading">
-                    <h5 class="panel-title">購買偏好 ({{ productbase_list|length }})</h5>
-                    <div class="heading-elements"></div>
-                </div>
+                    <tr class="row">
+                        <td class="col-md-2">{{facebook_review.created_time|date:"Y-m-d"}}</td>
 
-                <table class="table">
+                        <td class="col-md-10">
+                            {{facebook_review.review_text}}
+                        </td>
+                    </tr>
 
-                    <thead class="">
-                        <tr class="row">
-                            <th class="col-md-3"></th>
-                            <th class="col-md-7">品名</th>
-                            <th class="col-md-2 text-right">個數</th>
-                        </tr>
-                    </thead>
+                </tbody>
 
-                    <tbody>
-
-                        {% for product in productbase_list %}
-
-                            <tr class="row">
-                                <td class="">
-                                    <span class="text-muted text-size-small mr-10">#{{forloop.counter}}</span>
-                                    <a href="{{product.url}}" target="_blank">{{product.external_id}}</a>
-                                </td>
-                                <td class=""><a href="{{product.url}}" target="_blank">{{product.name}}</a></td>
-                                <td class="text-right">{{product.count}}</td>
-                            </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-                {% endwith %}
-
-            </div>
-
-            {# Facebook 評論 #}
-            {% with clientbase.get_facebook_review as facebook_review %}
-
-            {% if facebook_review %}
-                
-                <div class="panel panel-white">
-
-                    <div class="panel-heading">
-                        <h5 class="panel-title">{% trans "Facebook 評論" %}</h5>
-                        <div class="heading-elements"></div>
-                    </div>
-
-                    <table class="table text-size-small">
-
-                        <tbody>
-
-                            <tr class="row">
-                                <td class="col-md-2">{{facebook_review.created_time|date:"Y-m-d"}}</td>
-
-                                <td class="col-md-10">
-                                    {{facebook_review.review_text}}
-                                </td>
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            {% endif %}
-
-            {% endwith %}
-
-
-            {# Facebook 按讚記錄 #}
-            <div class="panel panel-white">
-
-                {% with clientbase.get_facebook_likes as facebook_likes %}
-
-                <div class="panel-heading">
-                    <h5 class="panel-title">{% trans "Facebook 按讚記錄" %} ({{ facebook_likes|length }})</h5>
-                    <div class="heading-elements"></div>
-                </div>
-
-                <table class="table text-size-small">
-
-                    <tbody>
-
-                        {% for like in facebook_likes %}
-
-                            <tr class="row">
-                                <td class="col-md-2">{{like.post__created_time|date:"Y-m-d"}}</td>
-
-                                <td class="col-md-10">
-                                    <a href="{{like.post__permalink_url}}" target="_blank">{{like.post__message|truncatechars:40}}</a>
-                                </td>
-                            </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-                {% endwith %}
-
-            </div>
-
-            {# Facebook 評論記錄 #}
-            <div class="panel panel-white">
-
-                {% with clientbase.get_facebook_comments as facebook_comments %}
-
-                <div class="panel-heading">
-                    <h5 class="panel-title">{% trans "Facebook 評論記錄" %} ({{ facebook_comments|length }})</h5>
-                    <div class="heading-elements"></div>
-                </div>
-
-                <table class="table text-size-small">
-
-                    <tbody>
-
-                        {% for comment in facebook_comments %}
-
-                            <tr class="row">
-                                <td class="col-md-2">{{comment.created_time|date:"Y-m-d"}}</td>
-
-                                <td class="col-md-5">
-                                    <a href="{{comment.post__permalink_url}}" target="_blank">{{comment.post__message|truncatechars:40}}</a>
-                                </td>
-                                <td class="col-md-5"><a href="{{comment.permalink_url}}" target="_blank">{{comment.message}}</a></td>
-                            </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-                {% endwith %}
-
-            </div>
+            </table>
 
         </div>
+
+    {% endif %}
+
+    {% endwith %}
+
+
+    {# Facebook 按讚記錄 #}
+    <div class="panel panel-white">
+
+        {% with clientbase.get_facebook_likes as facebook_likes %}
+
+        <div class="panel-heading">
+            <h5 class="panel-title">{% trans "Facebook 按讚記錄" %} ({{ facebook_likes|length }})</h5>
+            <div class="heading-elements"></div>
+        </div>
+
+        <table class="table text-size-small">
+
+            <tbody>
+
+                {% for like in facebook_likes %}
+
+                    <tr class="row">
+                        <td class="col-md-2">{{like.post__created_time|date:"Y-m-d"}}</td>
+
+                        <td class="col-md-10">
+                            <a href="{{like.post__permalink_url}}" target="_blank">{{like.post__message|truncatechars:40}}</a>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+        {% endwith %}
+
+    </div>
+
+    {# Facebook 評論記錄 #}
+    <div class="panel panel-white">
+
+        {% with clientbase.get_facebook_comments as facebook_comments %}
+
+        <div class="panel-heading">
+            <h5 class="panel-title">{% trans "Facebook 評論記錄" %} ({{ facebook_comments|length }})</h5>
+            <div class="heading-elements"></div>
+        </div>
+
+        <table class="table text-size-small">
+
+            <tbody>
+
+                {% for comment in facebook_comments %}
+
+                    <tr class="row">
+                        <td class="col-md-2">{{comment.created_time|date:"Y-m-d"}}</td>
+
+                        <td class="col-md-5">
+                            <a href="{{comment.post__permalink_url}}" target="_blank">{{comment.post__message|truncatechars:40}}</a>
+                        </td>
+                        <td class="col-md-5"><a href="{{comment.permalink_url}}" target="_blank">{{comment.message}}</a></td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+        {% endwith %}
 
     </div>
 
