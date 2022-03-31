@@ -17,3 +17,7 @@ class MediaExtension(Extension):
         return registry
 
 media_ext = MediaExtension()
+
+media_ext.client_info_panel_templates = [
+    'team/clients/_media_info.html'
+]

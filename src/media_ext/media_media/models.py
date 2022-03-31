@@ -3,12 +3,13 @@ import html2text
 from uuid import uuid4
 
 from django.db import models
+from django.db.models import Sum
 from django.contrib.postgres.fields import JSONField, ArrayField
 
 from datahub.models import DataSource
 
 from core.models import BaseModel, ValueTaggable
-from team.models import Team, OrderBase, ProductBase, ClientBase
+from team.models import Team, OrderBase, ProductBase, ClientBase, client_info_model
 from tag_assigner.utils import api_taggable
 
 from ..extension import media_ext
@@ -112,15 +113,29 @@ class ArticleBase(ProductBase):
         return reverse('media:article-records', kwargs={'uuid': self.uuid})
 
 
-@media_ext.ClientModel
-class Reader(ClientBase):
-    class Meta:
-        proxy = True
+@client_info_model
+class MediaInfo(BaseModel):
+
+    clientbase = models.ForeignKey(ClientBase, related_name='media_info', blank=False, on_delete=models.CASCADE)
+
+    def get_sum_of_total_read(self):
+        return self.clientbase.readbase_set.filter(removed=False).values('path').count()
+
+    def get_avg_of_each_read(self):
+        qs = self.clientbase.readbase_set.filter(removed=False)
+        if not qs.count():
+            return 0
+
+        data = qs.aggregate(total_read_rate=Sum('read_rate'))
+        total_read_rate = data.get('total_read_rate', 0)
+
+        return total_read_rate / qs.count()
+
 
 
 @media_ext.OrderModel
 class ReadBase(OrderBase):
-    articlebase = models.ForeignKey(ArticleBase, blank=False, null=True, on_delete=models.CASCADE)
+    articlebase = models.OneToOneField(ArticleBase, blank=False, null=True, on_delete=models.CASCADE)
     read_rate = models.FloatField(default=1)
 
     # for articlebase
