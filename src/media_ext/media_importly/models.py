@@ -32,6 +32,7 @@ class Article(RawModel):
     author = models.CharField(max_length=128)
     title = models.CharField(max_length=128)
     content = models.TextField(blank=False)
+    path = models.CharField(max_length=256)
 
     status = models.CharField(max_length=64, default=str)
 

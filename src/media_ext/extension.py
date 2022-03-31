@@ -16,4 +16,4 @@ class MediaExtension(Extension):
 
         return registry
 
-media_ext = Extension()
+media_ext = MediaExtension()

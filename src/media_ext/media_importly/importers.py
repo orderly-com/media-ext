@@ -5,7 +5,7 @@ from importly.formatters import (
     Formatted, format_datetime
 )
 
-from datahub.dataflows import handle_data
+from datahub.data_flows import handle_data
 
 from ..extension import media_ext
 
@@ -22,6 +22,7 @@ class ArticleDataTransfer:
         author = Formatted(str, 'author')
         title = Formatted(str, 'title')
         content = Formatted(str, 'content')
+        path = Formatted(str, 'path')
 
         status = Formatted(str, 'status')
 
@@ -44,7 +45,7 @@ class ArticleImporter(DataImporter):
             articlebase_map[articlebase['external_id']] = ArticleBase(id=articlebase['id'])
 
         for article in self.datalist.article_set.values(
-            'id', 'external_id', 'title',
+            'id', 'external_id', 'title', 'path',
             'content', 'attributions', 'datetime', 'author', 'status'
         ):
             if article['external_id'] in articlebase_map:
@@ -55,7 +56,7 @@ class ArticleImporter(DataImporter):
                 articlebase = ArticleBase(external_id=article['external_id'], team=self.team, datasource=self.datasource)
                 articlebases_to_create.append(articlebase)
 
-            article['location_rule'] = rf'^{article.path}$'
+            article['location_rule'] = rf'^{article["path"]}$'
 
             article = handle_data(article, channels.ARTICLE_TO_ARTICLEBASE)
 
@@ -113,7 +114,7 @@ class ReadImporter(DataImporter):
 
         for read_data in self.datalist.read_set.values('path', 'title', 'id', 'datetime', 'attributions'):
             for articlebase in self.team.articlebase_set.filter(removed=False):
-                is_match = media_ext.read_match_function(articlebase.rule, read_data)
+                is_match = media_ext.read_match_function(articlebase.location_rule, read_data)
                 if is_match:
                     readbases_to_create.append(
                         ReadBase(
