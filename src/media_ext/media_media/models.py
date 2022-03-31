@@ -7,14 +7,14 @@ from django.contrib.postgres.fields import JSONField, ArrayField
 
 from datahub.models import DataSource
 
+from core.models import BaseModel, ValueTaggable
 from team.models import Team, OrderBase, ProductBase, ClientBase
-from core.models import BaseModel
+from tag_assigner.utils import api_taggable
 
 from ..extension import media_ext
 
 
-@media_ext.ProductModel
-class PageBase(ProductBase):
+class PageBase(BaseModel):
     pass
 
 
@@ -37,7 +37,9 @@ class ArticleCategory(BaseModel):
     removed = models.BooleanField(default=False)
 
 
-class ArticleBase(BaseModel):
+@media_ext.ProductModel
+@api_taggable(type_id='article')
+class ArticleBase(ProductBase):
     class Meta:
         indexes = [
             models.Index(fields=['team', ]),
@@ -59,6 +61,8 @@ class ArticleBase(BaseModel):
     title = models.CharField(max_length=128)
     path = models.CharField(max_length=128)
     content = models.TextField(blank=False)
+
+    location_rule = models.CharField(max_length=256)
 
     STATE_DRAFT = 'draft'
     STATE_PUBLISHED = 'published'
