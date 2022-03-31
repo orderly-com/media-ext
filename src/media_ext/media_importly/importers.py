@@ -121,6 +121,7 @@ class ReadImporter(DataImporter):
                             articlebase=articlebase,
                             datetime=read_data['datetime'],
                             attributions=read_data['attributions'],
+                            title=read_data['title'],
                             path=read_data['path'],
                             team=self.team,
                             datasource=self.datasource
