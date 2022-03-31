@@ -44,9 +44,9 @@
 
                             <thead>
                                 <tr class="row">
-                                    <th class="col-md-5">讀者</th>
-                                    <th class="col-md-5">網址</th>
-                                    <th class="col-md-1"><div class="text-right">閱讀率</div></th>
+                                    <th class="col-md-3">讀者</th>
+                                    <th class="col-md-6">網址</th>
+                                    <th class="col-md-1"><div class="text-center">閱讀率</div></th>
                                     <th class="col-md-2"><div class="text-right">時間</div></th>
                                 </tr>
                             </thead>
@@ -72,7 +72,7 @@
 
                                         {# 閱讀率 #}
                                         <td>
-                                            <div class="text-right">
+                                            <div class="text-center">
                                                 {{ readbase.read_rate|percent:1 }} <span class="text-muted text-size-small">%</span>
                                             </div>
                                         </td>
