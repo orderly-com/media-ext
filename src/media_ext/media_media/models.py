@@ -42,7 +42,6 @@ class ArticleCategory(BaseModel):
 class ArticleBase(ProductBase):
     class Meta:
         indexes = [
-            models.Index(fields=['team', ]),
             models.Index(fields=['datasource', ]),
             models.Index(fields=['title', ]),
 
