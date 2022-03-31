@@ -50,11 +50,6 @@ class ArticleBase(ProductBase):
             models.Index(fields=['team', 'title']),
         ]
 
-    external_id = models.CharField(max_length=128)
-
-    team = models.ForeignKey(Team, blank=False, on_delete=models.CASCADE)
-    uuid = models.UUIDField(default=uuid4, unique=True)
-
     datetime = models.DateTimeField(blank=True, null=True)
 
     author = models.CharField(max_length=128)
@@ -77,8 +72,6 @@ class ArticleBase(ProductBase):
         (STATE_UNSET, '未知'),
     )
     status = models.CharField(max_length=64, choices=STATE_CHOICES, default='draft')
-
-    removed = models.BooleanField(default=False)
 
     datasource = models.ForeignKey(DataSource, blank=False, default=1, on_delete=models.CASCADE)
 
