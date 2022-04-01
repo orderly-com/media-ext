@@ -120,98 +120,11 @@
 
         <div class="panel-body text-center">
 
-            <div class="text-semibold text-yellow h1">{{ clientbase.get_fast_segmentation|display_fast_segmentation }}</div>
+            <!-- <div class="text-semibold text-yellow h1">{{ clientbase.get_fast_segmentation|display_fast_segmentation }}</div> -->
 
         </div>
 
         <table class="table">
-
-            <tr class="row">
-                <td class="col-md-4">
-                    RFM 得分
-                    <a href="https://wiki.mbalib.com/zh-tw/RFM%E6%A8%A1%E5%9E%8B" target="_bank"><i class="icon-info22 text-muted ml-5"></i></a>
-
-                </td>
-                <td class="col-md-8">
-                    {% if clientbase.rfm_total_score != -1 %}
-                        <div class="text-semibold">{{clientbase.rfm_total_score}}</div>
-                    {% else %}
-                        暫無分數
-                    {% endif %}
-                </td>
-            </tr>
-
-            <tr class="row">
-                <td>(R) 時間分數</td>
-                <td>
-                    {% if clientbase.rfm_total_score != -1 %}
-                        <div class="text-semibold">{{clientbase.rfm_recency}}</div>
-                    {% else %}
-                        --
-                    {% endif %}
-                </td>
-            </tr>
-
-            <tr class="row">
-                <td>(F) 頻率分數</td>
-                <td>
-                    {% if clientbase.rfm_total_score != -1 %}
-                        <div class="text-semibold">{{clientbase.rfm_frequency}}</div>
-                    {% else %}
-                        --
-                    {% endif %}
-                </td>
-            </tr>
-
-            <tr class="row">
-                <td>(M) 瀏覽分數</td>
-                <td>
-                    {% if clientbase.rfm_total_score != -1 %}
-                        <div class="text-semibold">{{clientbase.rfm_monetary}}</div>
-                    {% else %}
-                        --
-                    {% endif %}
-                </td>
-            </tr>
-
-            <tr class="row">
-                <td>跨通路購買</td>
-                <td>
-                    {% if clientbase.is_cross_datasources %}
-                        [ <span class="text-yellow text-bold">是</span> / <span class="text-muted">否</span> ]
-                    {% else %}
-                        [ <span class="text-muted">是</span> /  <span class="text-yellow text-bold">否</span> ]
-                    {% endif %}
-                </td>
-            </tr>
-
-            <tr class="row">
-                <td>跨品項購買</td>
-                <td>
-                    {% if clientbase.is_cross_productbases%}
-                        [ <span class="text-yellow text-bold">是</span> / <span class="text-muted">否</span> ]
-                    {% else %}
-                        [ <span class="text-muted">是</span> /  <span class="text-yellow text-bold">否</span>]
-                    {% endif %}
-                </td>
-            </tr>
-
-            <tr class="row">
-                <td>折扣敏感型</td>
-                <td>
-                    {% with clientbase.get_discount_sensitive as sensitive_level %}
-
-                        [
-                            <span class="{% if sensitive_level == 0 %}text-yellow text-bold{%else%}text-muted{% endif %}">低</span> /
-                            <span class="{% if sensitive_level == 1 %}text-yellow text-bold{%else%}text-muted{% endif %}">中</span> /
-                            <span class="{% if sensitive_level == 2 %}text-yellow text-bold{%else%}text-muted{% endif %}">高</span>
-                        ]
-
-                    {% endwith %}
-
-                </td>
-            </tr>
-
 
         </table>
 
