@@ -147,11 +147,13 @@ class MediaInfo(BaseModel):
 
 @media_ext.OrderModel
 class ReadBase(OrderBase):
-    articlebase = models.OneToOneField(ArticleBase, blank=False, null=True, on_delete=models.CASCADE)
+    articlebase = models.ForeignKey(ArticleBase, blank=False, null=True, on_delete=models.CASCADE)
     read_rate = models.FloatField(default=1)
 
     # for articlebase
     title = models.CharField(max_length=128)
     path = models.CharField(max_length=128)
 
+    uid = models.CharField(max_length=128)
+    cid = models.CharField(max_length=128)
     attributions = JSONField(default=dict)

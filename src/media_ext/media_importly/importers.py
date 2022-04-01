@@ -102,6 +102,8 @@ class ReadDataTransfer:
 
         title = Formatted(str, 'title')
         path = Formatted(str, 'path')
+        uid = Formatted(str, 'path')
+        cid = Formatted(str, 'path')
 
         datetime = Formatted(format_datetime, 'datetime')
 
@@ -123,6 +125,8 @@ class ReadImporter(DataImporter):
                             attributions=read_data['attributions'],
                             title=read_data['title'],
                             path=read_data['path'],
+                            uid=read_data['uid'],
+                            cid=read_data['cid'],
                             team=self.team,
                             datasource=self.datasource
                         )
