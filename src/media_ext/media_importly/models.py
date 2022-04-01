@@ -60,6 +60,8 @@ class Read(RawModel):
 
     external_id = models.CharField(max_length=128)
 
+    uid = models.CharField(max_length=128)
+    cid = models.CharField(max_length=128)
     team = models.ForeignKey(Team, blank=False, on_delete=models.CASCADE)
 
     datetime = models.DateTimeField(blank=True, null=True)

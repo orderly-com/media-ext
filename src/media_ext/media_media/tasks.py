@@ -31,6 +31,8 @@ def sync_reading_data(*args, **kwargs):
             {
                 'datetime': row[kafka_headers.DATETIME],
                 'title': row[kafka_headers.TITLE],
+                'uid': row[kafka_headers.USER],
+                'cid': row[kafka_headers.CID],
                 'path': row[kafka_headers.PATH],
                 'attributions': row[kafka_headers.PARAMS],
             } for row in data
@@ -49,12 +51,16 @@ def sync_reading_data(*args, **kwargs):
 def find_reader(*args, **kwargs):
     for team in Team.objects.all():
         clientbase_uid_map = {}
-        for bridge in team.clientbaseuid_set.values('clientbase_id', 'uid'):
-            clientbase_uid_map[bridge['uid']] = bridge['clientbase_id']
+        for bridge in team.clientbase_set.values('id', 'uid'):
+            clientbase_uid_map[bridge['uid']] = bridge['id']
 
         readbases_to_update = []
-
-        for readbase in team.readbase_set.filter(removed=False, clientbase__isnull=True).values('id', 'uid'):
+        for readbase in (
+            team.readbase_set.filter(removed=False, clientbase__isnull=True)
+            .exclude(uid='')
+            .values('id', 'uid', 'articlebase__value_tag_ids')
+        ):
+            print(clientbase_uid_map, readbase['uid'])
             clientbase_id = clientbase_uid_map.get(readbase['uid'], None)
             if clientbase_id:
                 readbases_to_update.append(
@@ -63,7 +69,7 @@ def find_reader(*args, **kwargs):
                         clientbase_id=clientbase_id
                     )
                 )
-            value_tags = list(ValueTag.objects.filter(id__in=readbase.article.value_tag_ids))
-            TagAssigner.bulk_assign_tags(value_tags, team.clientbase_set.get(id=clientbase_id), 'article')
+                value_tags = list(ValueTag.objects.filter(id__in=readbase['articlebase__value_tag_ids']))
+                TagAssigner.bulk_assign_tags(value_tags, team.clientbase_set.get(id=clientbase_id), 'article')
 
         ReadBase.objects.bulk_update(readbases_to_update, ['clientbase_id'], batch_size=settings.BATCH_SIZE_M)

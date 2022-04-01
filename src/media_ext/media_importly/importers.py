@@ -102,8 +102,8 @@ class ReadDataTransfer:
 
         title = Formatted(str, 'title')
         path = Formatted(str, 'path')
-        uid = Formatted(str, 'path')
-        cid = Formatted(str, 'path')
+        uid = Formatted(str, 'uid')
+        cid = Formatted(str, 'cid')
 
         datetime = Formatted(format_datetime, 'datetime')
 
@@ -114,7 +114,7 @@ class ReadImporter(DataImporter):
     def process_raw_records(self):
         readbases_to_create = []
 
-        for read_data in self.datalist.read_set.values('path', 'title', 'id', 'datetime', 'attributions'):
+        for read_data in self.datalist.read_set.values('path', 'title', 'id', 'datetime', 'attributions', 'uid', 'cid'):
             for articlebase in self.team.articlebase_set.filter(removed=False):
                 is_match = media_ext.read_match_function(articlebase.location_rule, read_data)
                 if is_match:
