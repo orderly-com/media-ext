@@ -56,7 +56,7 @@ class ArticleImporter(DataImporter):
                 articlebase = ArticleBase(external_id=article['external_id'], team=self.team, datasource=self.datasource)
                 articlebases_to_create.append(articlebase)
 
-            article['location_rule'] = rf'^{article["path"]}$'
+            article['location_rule'] = rf'^{article["path"]}'
 
             article = handle_data(article, channels.ARTICLE_TO_ARTICLEBASE)
 

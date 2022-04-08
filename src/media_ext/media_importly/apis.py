@@ -21,7 +21,7 @@ class ImportArticleList(APIView):
     def post(self, request, *args, **kwargs):
 
         signature = kwargs.get('signature')
-        api_key = request.headers.get('X-API-Key')
+        api_key = request.headers.get('X-Api-Key')
 
         if not any([signature, api_key]):
             return JsonResponse({'result': False, 'msg': {'title': 'Value Missing', 'text': 'Signature or api_key is missing.'}}, status=status.HTTP_400_BAD_REQUEST)
