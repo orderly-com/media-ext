@@ -68,7 +68,7 @@ class Read(RawModel):
 
     # for articlebase
     title = models.CharField(max_length=128)
-    path = models.CharField(max_length=128)
+    path = models.CharField(max_length=512)
 
     removed = models.BooleanField(default=False)
 
