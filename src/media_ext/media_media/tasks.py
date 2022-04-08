@@ -74,6 +74,8 @@ def find_reader(*args, **kwargs):
 
         ReadBase.objects.bulk_update(readbases_to_update, ['clientbase_id'], batch_size=settings.BATCH_SIZE_M)
 
+
+@media_ext.periodic_task()
 def find_article():
     for team in Team.objects.all():
         readbases_to_create = []
