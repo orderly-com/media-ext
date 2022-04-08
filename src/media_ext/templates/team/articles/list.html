@@ -33,7 +33,7 @@
                     <div class="table-responsive">
                         <table class="table table-striped table-hover">
                             <thead class="">
-                                <th class="col-md-2 text-left">{% trans "來源/編號" %}</th>
+                                <th class="col-md-2 text-left">{% trans "名稱" %}</th>
                                 <th class="col-md-2 text-left">{% trans "狀態" %}</th>
                                 <th class="col-md-2 text-center">{% trans "作者" %}</th>
                                 <th class="col-md-2 text-center">{% trans "發布日" %}</th>
@@ -47,13 +47,6 @@
                                     <tr data-id="{{ articlebase.external_id }}">
                                         {# 來源/編號 #}
                                         <td class="text-left">
-                                            {% if team_has_child %}
-                                                <div class="text-size-small">{{ articlebase.team.name }}</div>
-                                            {% endif %}
-                                            {# 來源 #}
-                                            <div class="">
-                                                <a class="" href="{% url 'datahub:datasource-detail' articlebase.datasource.uuid %}" target="_blank">{{ articlebase.datasource.name }}</a>
-                                            </div>
                                             {# 編號 #}
                                             <a href="{{articlebase.get_detail_url}}" target="_blank">[{{ articlebase.external_id }}] {{ articlebase.title }}</a>
                                         </td>
