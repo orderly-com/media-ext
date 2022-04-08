@@ -7,7 +7,7 @@ from datahub.models import DataSync
 from team.models import Team
 from tag_assigner.models import TagAssigner, ValueTag
 
-from ..media_importly.importers import ReadImporter, ReadDataTransfer
+from ..media_importly.importers import ReadImporter, ReadDataTransfer, Read
 from ..media_media.models import ReadBase
 
 from .datahub import data_types
@@ -73,3 +73,36 @@ def find_reader(*args, **kwargs):
                 TagAssigner.bulk_assign_tags(value_tags, team.clientbase_set.get(id=clientbase_id), 'article')
 
         ReadBase.objects.bulk_update(readbases_to_update, ['clientbase_id'], batch_size=settings.BATCH_SIZE_M)
+
+def find_article():
+    for team in Team.objects.all():
+        readbases_to_create = []
+        reads_to_update = []
+
+        for read_data in team.read_set.filter(readbase__isnull=True).values('path', 'title', 'id', 'datetime', 'attributions', 'uid', 'cid', 'datasource'):
+            for articlebase in team.articlebase_set.filter(removed=False):
+                is_match = media_ext.read_match_function(articlebase.location_rule, read_data)
+                if is_match:
+                    readbase = ReadBase(
+                        articlebase=articlebase,
+                        datetime=read_data['datetime'],
+                        attributions=read_data['attributions'],
+                        title=read_data['title'],
+                        path=read_data['path'],
+                        uid=read_data['uid'],
+                        cid=read_data['cid'],
+                        team=team,
+                        datasource=read_data['datasource']
+                    )
+
+                    reads_to_update.append(
+                        Read(readbase=readbase, id=read_data['id'])
+                    )
+
+                    readbases_to_create.append(readbase)
+
+        ReadBase.objects.bulk_create(readbases_to_create, batch_size=settings.BATCH_SIZE_M)
+        for read in reads_to_update:
+            read.readbase_id = read.readbase.id
+
+        Read.objects.bulk_update(reads_to_update, update_fields=['readbase_id'], batch_size=settings.BATCH_SIZE_M)

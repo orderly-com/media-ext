@@ -9,7 +9,7 @@ from team.models import Team
 from core.models import BaseModel, ValueTaggable
 from importly.models import RawModel
 
-from ..media_media.models import ArticleBase
+from ..media_media.models import ArticleBase, ReadBase
 
 class Article(RawModel):
     class Meta:
@@ -22,15 +22,15 @@ class Article(RawModel):
             models.Index(fields=['team', 'title']),
         ]
 
-    external_id = models.CharField(max_length=128)
+    external_id = models.TextField(blank=False)
 
     team = models.ForeignKey(Team, blank=False, on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid4, unique=True)
 
     datetime = models.DateTimeField(blank=True, null=True)
 
-    author = models.CharField(max_length=128)
-    title = models.CharField(max_length=128)
+    author = models.TextField(blank=False)
+    title = models.TextField(blank=False)
     content = models.TextField(blank=False)
     path = models.CharField(max_length=256)
 
@@ -58,20 +58,22 @@ class Read(RawModel):
             models.Index(fields=['team', 'title']),
         ]
 
-    external_id = models.CharField(max_length=128)
+    external_id = models.TextField(blank=False)
 
-    uid = models.CharField(max_length=128)
-    cid = models.CharField(max_length=128)
+    uid = models.TextField(blank=False)
+    cid = models.TextField(blank=False)
     team = models.ForeignKey(Team, blank=False, on_delete=models.CASCADE)
 
     datetime = models.DateTimeField(blank=True, null=True)
 
     # for articlebase
-    title = models.CharField(max_length=128)
-    path = models.CharField(max_length=512)
+    title = models.TextField(blank=False)
+    path = models.TextField(blank=False)
 
     removed = models.BooleanField(default=False)
 
     datasource = models.ForeignKey(DataSource, blank=False, default=1, on_delete=models.CASCADE)
+
+    readbase = models.ForeignKey(ReadBase, blank=True, null=True, on_delete=models.CASCADE)
 
     attributions = JSONField(default=dict)

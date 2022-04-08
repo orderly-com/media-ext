@@ -31,10 +31,10 @@ class ArticleCategory(BaseModel):
 
     team = models.ForeignKey(Team, blank=False, on_delete=models.CASCADE)
 
-    external_id = models.CharField(max_length=128)
+    external_id = models.TextField(blank=False)
     uuid = models.UUIDField(default=uuid4, unique=True)
 
-    name = models.CharField(max_length=128)
+    name = models.TextField(blank=False)
     removed = models.BooleanField(default=False)
 
 
@@ -52,9 +52,9 @@ class ArticleBase(ProductBase):
 
     datetime = models.DateTimeField(blank=True, null=True)
 
-    author = models.CharField(max_length=128)
-    title = models.CharField(max_length=128)
-    path = models.CharField(max_length=128)
+    author = models.TextField(blank=False)
+    title = models.TextField(blank=False)
+    path = models.TextField(blank=False)
     content = models.TextField(blank=False)
 
     location_rule = models.CharField(max_length=256)
@@ -151,9 +151,9 @@ class ReadBase(OrderBase):
     read_rate = models.FloatField(default=1)
 
     # for articlebase
-    title = models.CharField(max_length=128)
-    path = models.CharField(max_length=128)
+    title = models.TextField(blank=False)
+    path = models.TextField(blank=False)
 
-    uid = models.CharField(max_length=128)
-    cid = models.CharField(max_length=128)
+    uid = models.TextField(blank=False)
+    cid = models.TextField(blank=False)
     attributions = JSONField(default=dict)

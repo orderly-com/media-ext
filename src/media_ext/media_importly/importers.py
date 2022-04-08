@@ -112,24 +112,4 @@ class ReadDataTransfer:
 
 class ReadImporter(DataImporter):
     def process_raw_records(self):
-        readbases_to_create = []
-
-        for read_data in self.datalist.read_set.values('path', 'title', 'id', 'datetime', 'attributions', 'uid', 'cid'):
-            for articlebase in self.team.articlebase_set.filter(removed=False):
-                is_match = media_ext.read_match_function(articlebase.location_rule, read_data)
-                if is_match:
-                    readbases_to_create.append(
-                        ReadBase(
-                            articlebase=articlebase,
-                            datetime=read_data['datetime'],
-                            attributions=read_data['attributions'],
-                            title=read_data['title'],
-                            path=read_data['path'],
-                            uid=read_data['uid'],
-                            cid=read_data['cid'],
-                            team=self.team,
-                            datasource=self.datasource
-                        )
-                    )
-
-        ReadBase.objects.bulk_create(readbases_to_create, batch_size=settings.BATCH_SIZE_M)
+        pass
