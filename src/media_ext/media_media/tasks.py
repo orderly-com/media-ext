@@ -15,7 +15,7 @@ from ..extension import media_ext
 
 
 @media_ext.periodic_task()
-def sync_reading_data(*args, **kwargs):
+def sync_reading_data(until=None, **kwargs):
     for team in Team.objects.all():
         params = {}
         datasource, created = team.datasource_set.get_or_create(name='system')
@@ -25,6 +25,11 @@ def sync_reading_data(*args, **kwargs):
 
         datasync = DataSync.generate_next_object(team, data_type=data_types.SYNC_READING_DATA)
         params['to_datetime'] = datasync.datetime
+
+        if until:
+            params['to_datetime'] = until
+            datasync.datetime = until
+            datasync.save()
 
         data = fetch_site_tracking_data(team, **params)
         data = [
