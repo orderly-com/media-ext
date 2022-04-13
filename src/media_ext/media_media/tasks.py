@@ -86,12 +86,16 @@ def find_article():
         readbases_to_create = []
         reads_to_update = []
 
+        articlebases = list(
+            team.articlebase_set.filter(removed=False).values('id', 'location_rule')
+        )
+
         for read_data in team.read_set.filter(readbase__isnull=True).values('path', 'title', 'id', 'datetime', 'attributions', 'uid', 'cid', 'datasource'):
-            for articlebase in team.articlebase_set.filter(removed=False):
-                is_match = media_ext.read_match_function(articlebase.location_rule, read_data)
+            for articlebase in articlebases:
+                is_match = media_ext.read_match_function(articlebase['location_rule'], read_data)
                 if is_match:
                     readbase = ReadBase(
-                        articlebase=articlebase,
+                        articlebase_id=articlebase['id'],
                         datetime=read_data['datetime'],
                         attributions=read_data['attributions'],
                         title=read_data['title'],
