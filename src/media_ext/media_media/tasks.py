@@ -56,8 +56,8 @@ def sync_reading_data(until=None, **kwargs):
 def find_reader(*args, **kwargs):
     for team in Team.objects.all():
         clientbase_uid_map = {}
-        for bridge in team.clientbase_set.values('id', 'uid'):
-            clientbase_uid_map[bridge['uid']] = bridge['id']
+        for bridge in team.clientbase_set.values('id', 'external_id'):
+            clientbase_uid_map[bridge['external_id']] = bridge['id']
 
         readbases_to_update = []
         for readbase in (
