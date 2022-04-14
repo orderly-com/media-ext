@@ -40,7 +40,7 @@ class MediaExtension(Extension):
 
 
             obj = {
-                'datetime': f'{from_datetime}~{to_datetime}',
+                'datetime': from_datetime,
                 'trigger_by': 'client',
                 'action': '閱讀',
                 'value': value,
