@@ -43,7 +43,8 @@ class MediaExtension(Extension):
                 'datetime': from_datetime,
                 'trigger_by': 'client',
                 'action': '閱讀',
-                'value': value,
+                'value': '',
+                'data': value
             }
             behaviors.append(obj)
         return behaviors
