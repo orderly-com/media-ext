@@ -77,8 +77,12 @@
                                             {% if reader %}
 
                                                 <div>
-                                                    <a href="{{articlebase.clientbase.get_detail_url}}" target="_blank">
-                                                        {{ reader.name }}
+                                                    <a href="{{ reader.get_detail_url }}" target="_blank">
+                                                        {% if reader.name %}
+                                                            {{ reader.name }}
+                                                        {% else %}
+                                                            -
+                                                        {% endif %}
                                                     </a>
                                                 </div>
                                                 <div>{{ reader.get_masked_email }}</div>
