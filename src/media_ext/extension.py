@@ -19,7 +19,7 @@ class MediaExtension(Extension):
 
         return registry
 
-    def get_clientbase_behaviors(clientbase):
+    def get_clientbase_behaviors(self, clientbase):
         behaviors = []
 
         read_qs = (clientbase.readbase_set.filter(removed=False)
