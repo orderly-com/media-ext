@@ -1,4 +1,7 @@
+import datetime
+
 from django.conf import settings
+from django.utils import timezone
 
 from cerem.tasks import fetch_site_tracking_data
 from cerem.utils import kafka_headers
@@ -82,6 +85,7 @@ def find_reader(*args, **kwargs):
 
 @media_ext.periodic_task()
 def find_article():
+    trace_from = timezone.now() - datetime.timedelta(days=30)
     for team in Team.objects.all():
         readbases_to_create = []
         reads_to_update = []
@@ -90,7 +94,7 @@ def find_article():
             team.articlebase_set.filter(removed=False).values('id', 'location_rule')
         )
 
-        for read_data in team.read_set.filter(readbase__isnull=True).values('path', 'title', 'id', 'datetime', 'attributions', 'uid', 'cid', 'datasource'):
+        for read_data in team.read_set.filter(readbase__isnull=True, datetime__gte=trace_from).values('path', 'title', 'id', 'datetime', 'attributions', 'uid', 'cid', 'datasource'):
             for articlebase in articlebases:
                 is_match = media_ext.read_match_function(articlebase['location_rule'], read_data)
                 if is_match:

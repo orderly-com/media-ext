@@ -100,7 +100,7 @@ class ArticleBase(ProductBase):
 
     def get_latest_reader(self):
         clientbase = None
-        readbase = self.readbase_set.order_by('-c_at').first()
+        readbase = self.readbase_set.filter(removed=False).order_by('-c_at').first()
         if readbase:
             clientbase = readbase.clientbase
 
