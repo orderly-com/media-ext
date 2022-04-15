@@ -63,7 +63,6 @@ def find_reader(*args, **kwargs):
         clientbase_uid_map = {}
         for bridge in team.clientbase_set.values('id', 'external_id'):
             clientbase_uid_map[bridge['external_id']] = bridge['id']
-
         readbase_qs = (team.readbase_set.filter(removed=False, clientbase__isnull=True)
             .exclude(uid='')
             .values('id', 'uid', 'articlebase__value_tag_ids')
@@ -71,7 +70,6 @@ def find_reader(*args, **kwargs):
         for readbase_batch in batch_list(readbase_qs, settings.BATCH_SIZE_L):
             readbases_to_update = []
             for readbase in readbase_batch:
-                print(clientbase_uid_map, readbase['uid'])
                 clientbase_id = clientbase_uid_map.get(readbase['uid'], None)
                 if clientbase_id:
                     readbases_to_update.append(
@@ -82,7 +80,6 @@ def find_reader(*args, **kwargs):
                     )
                     value_tags = list(ValueTag.objects.filter(id__in=readbase['articlebase__value_tag_ids']))
                     TagAssigner.bulk_assign_tags(value_tags, team.clientbase_set.get(id=clientbase_id), 'article')
-
             ReadBase.objects.bulk_update(readbases_to_update, ['clientbase_id'], batch_size=settings.BATCH_SIZE_M)
 
 
