@@ -1,3 +1,4 @@
+import gc
 import datetime
 
 from django.conf import settings
@@ -61,7 +62,7 @@ def sync_reading_data(until=None, **kwargs):
 def find_reader(*args, **kwargs):
     for team in Team.objects.all():
         clientbase_uid_map = {}
-        for bridge in team.clientbase_set.values('id', 'external_id'):
+        for bridge in team.clientbase_set.filter(removed=False).values('id', 'external_id'):
             clientbase_uid_map[bridge['external_id']] = bridge['id']
         readbase_qs = (team.readbase_set.filter(removed=False, clientbase__isnull=True)
             .exclude(uid='')
@@ -81,6 +82,7 @@ def find_reader(*args, **kwargs):
                     value_tags = list(ValueTag.objects.filter(id__in=readbase['articlebase__value_tag_ids']))
                     TagAssigner.bulk_assign_tags(value_tags, team.clientbase_set.get(id=clientbase_id), 'article')
             ReadBase.objects.bulk_update(readbases_to_update, ['clientbase_id'], batch_size=settings.BATCH_SIZE_M)
+            gc.collect()
 
 
 @media_ext.periodic_task()
