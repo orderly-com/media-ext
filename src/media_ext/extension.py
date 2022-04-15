@@ -24,19 +24,20 @@ class MediaExtension(Extension):
 
         read_qs = (clientbase.readbase_set.filter(removed=False)
             .values('datetime__date', 'articlebase__title', 'articlebase__path')
-            .annotate(from_datetime=Min('datetime'), to_datetime=Max('datetime'))
+            .annotate(from_datetime=Min('datetime'), to_datetime=Max('datetime'), rate=Max('read_rate'))
         ).order_by('from_datetime')
 
         for item in read_qs:
             from_datetime = item['from_datetime']
             to_datetime = item['to_datetime']
             value = item['articlebase__title']
+            rate = item['rate']
             path = item['articlebase__path']
             if not value:
                 value = '--'
 
             if path:
-                value = f'<a class="text-info" href="{path}">{value}</a>'
+                value = f'<a class="text-info" href="{path}">{value}</a> ({rate*100}%)'
 
 
             obj = {
