@@ -123,5 +123,5 @@ def find_article():
             for read in reads_to_update:
                 read.readbase_id = read.readbase.id
 
-            Read.objects.bulk_update(reads_to_update, update_fields=['readbase_id'], batch_size=settings.BATCH_SIZE_M)
+            Read.objects.bulk_update(reads_to_update, ['readbase_id'], batch_size=settings.BATCH_SIZE_M)
             gc.collect()
