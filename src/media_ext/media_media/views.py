@@ -72,7 +72,7 @@ class ArticleListView(
             search_keys = [key for key in search_keys if key]
             conditions = Q()
             for word in search_keys:
-                conditions = conditions | Q(external_id__icontains=word) | Q(title_icontains=word)
+                conditions = conditions | Q(external_id__icontains=word) | Q(title__icontains=word)
 
             qs = qs.filter(conditions)
 
