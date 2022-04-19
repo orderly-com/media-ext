@@ -68,7 +68,7 @@ def find_reader(*args, **kwargs):
             .exclude(uid='')
             .values('id', 'uid', 'articlebase__value_tag_ids')
         )
-        for readbase_batch in batch_list(readbase_qs, settings.BATCH_SIZE_L):
+        for readbase_batch in batch_list(readbase_qs, settings.BATCH_SIZE_M):
             readbases_to_update = []
             for readbase in readbase_batch:
                 clientbase_id = clientbase_uid_map.get(readbase['uid'], None)
@@ -96,7 +96,7 @@ def find_article():
             team.articlebase_set.filter(removed=False).values('id', 'location_rule')
         )
         read_qs = team.read_set.filter(readbase__isnull=True, datetime__gte=trace_from).values('path', 'title', 'id', 'datetime', 'attributions', 'uid', 'cid', 'datasource')
-        for read_batch in batch_list(read_qs, settings.BATCH_SIZE_L):
+        for read_batch in batch_list(read_qs, settings.BATCH_SIZE_M):
             for read_data in read_batch:
                 for articlebase in articlebases:
                     is_match = media_ext.read_match_function(articlebase['location_rule'], read_data)
@@ -124,3 +124,4 @@ def find_article():
                 read.readbase_id = read.readbase.id
 
             Read.objects.bulk_update(reads_to_update, update_fields=['readbase_id'], batch_size=settings.BATCH_SIZE_M)
+            gc.collect()
