@@ -109,7 +109,7 @@ def find_article():
                         uid=read_data['uid'],
                         cid=read_data['cid'],
                         team=team,
-                        datasource=read_data['datasource']
+                        datasource_id=read_data['datasource']
                     )
 
                     reads_to_update.append(
