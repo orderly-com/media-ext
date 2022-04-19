@@ -89,14 +89,14 @@ def find_reader(*args, **kwargs):
 def find_article():
     trace_from = timezone.now() - datetime.timedelta(days=30)
     for team in Team.objects.all():
-        readbases_to_create = []
-        reads_to_update = []
-
         articlebases = list(
             team.articlebase_set.filter(removed=False).values('id', 'location_rule')
         )
         read_qs = team.read_set.filter(readbase__isnull=True, datetime__gte=trace_from).values('path', 'title', 'id', 'datetime', 'attributions', 'uid', 'cid', 'datasource')
         for read_batch in batch_list(read_qs, settings.BATCH_SIZE_M):
+            readbases_to_create = []
+            reads_to_update = []
+
             for read_data in read_batch:
                 for articlebase in articlebases:
                     is_match = media_ext.read_match_function(articlebase['location_rule'], read_data)
