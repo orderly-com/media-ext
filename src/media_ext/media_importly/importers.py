@@ -72,7 +72,7 @@ class ArticleImporter(DataImporter):
             article_reverse_link_map[article['id']] = articlebase
 
         ArticleBase.objects.bulk_create(articlebases_to_create, batch_size=settings.BATCH_SIZE_M)
-        update_fields = ['title', 'content', 'attributions', 'datetime', 'author', 'status', 'path']
+        update_fields = ['title', 'content', 'attributions', 'datetime', 'author', 'status', 'path', 'location_rule']
         ArticleBase.objects.bulk_update(articlebases_to_update, update_fields, batch_size=settings.BATCH_SIZE_M)
 
         articles_to_create = [

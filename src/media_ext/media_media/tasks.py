@@ -86,13 +86,18 @@ def find_reader(*args, **kwargs):
 
 
 @media_ext.periodic_task()
-def find_article():
-    trace_from = timezone.now() - datetime.timedelta(days=30)
+def find_article(period_from=None, period_to=None):
+    if period_to is None:
+        period_to = timezone.now()
+
+    if period_from is None:
+        period_from = period_to - datetime.timedelta(days=30)
+
     for team in Team.objects.all():
         articlebases = list(
             team.articlebase_set.filter(removed=False).values('id', 'location_rule')
         )
-        read_qs = team.read_set.filter(readbase__isnull=True, datetime__gte=trace_from).values('path', 'title', 'id', 'datetime', 'attributions', 'uid', 'cid', 'datasource')
+        read_qs = team.read_set.filter(readbase__isnull=True, datetime__gte=period_from, datetime__lte=period_to).values('path', 'title', 'id', 'datetime', 'attributions', 'uid', 'cid', 'datasource')
         for read_batch in batch_list(read_qs, settings.BATCH_SIZE_M):
             readbases_to_create = []
             reads_to_update = []
