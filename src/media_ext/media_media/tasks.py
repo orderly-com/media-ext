@@ -21,20 +21,24 @@ from ..extension import media_ext
 
 
 @media_ext.periodic_task()
-def sync_reading_data(until=None, **kwargs):
+def sync_reading_data(period_from=None, period_to=None, **kwargs):
     for team in Team.objects.all():
         params = {}
         datasource, created = team.datasource_set.get_or_create(name='system')
         last_sync = team.datasync_set.filter(data_type=data_types.SYNC_READING_DATA).order_by('-datetime').first()
-        if last_sync:
+
+        if period_from:
+            params['from_datetime'] = period_from
+
+        elif last_sync:
             params['from_datetime'] = last_sync.datetime
 
         datasync = DataSync.generate_next_object(team, data_type=data_types.SYNC_READING_DATA)
         params['to_datetime'] = datasync.datetime
 
-        if until:
-            params['to_datetime'] = until
-            datasync.datetime = until
+        if period_to:
+            params['to_datetime'] = period_to
+            datasync.datetime = period_to
             datasync.save()
 
         data = fetch_site_tracking_data(team, **params)
