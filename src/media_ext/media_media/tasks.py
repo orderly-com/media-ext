@@ -86,8 +86,6 @@ def find_reader(*args, **kwargs):
                             clientbase_id=clientbase_id
                         )
                     )
-                    value_tags = list(ValueTag.objects.filter(id__in=readbase['articlebase__value_tag_ids']))
-                    TagAssigner.bulk_assign_tags(value_tags, team.clientbase_set.get(id=clientbase_id), 'article')
             ReadBase.objects.bulk_update(readbases_to_update, ['clientbase_id'], batch_size=settings.BATCH_SIZE_M)
             gc.collect()
 
@@ -104,7 +102,7 @@ def find_article(period_from=None, period_to=None):
         articlebases = list(
             team.articlebase_set.filter(removed=False).values('id', 'location_rule')
         )
-        readbase_qs = team.read_set.filter(articlebase__isnull=True, datetime__gte=period_from, datetime__lte=period_to).values('path', 'title', 'id')
+        readbase_qs = team.readbase_set.filter(articlebase__isnull=True, datetime__gte=period_from, datetime__lte=period_to).values('path', 'title', 'id')
         for readbase_batch in batch_list(readbase_qs, settings.BATCH_SIZE_L):
             readbases_to_update = []
             for readbase_data in readbase_batch:
