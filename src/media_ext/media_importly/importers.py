@@ -1,4 +1,5 @@
 import datetime
+from dateutil import parser
 
 from django.conf import settings
 from django.db.models import Min
@@ -110,7 +111,7 @@ class ReadDataTransfer:
         cid = Formatted(str, 'cid')
         proceed = Formatted(lambda at: str(at) == 'proceed', 'action')
 
-        datetime = Formatted(format_datetime, 'datetime')
+        datetime = Formatted(parser.parse, 'datetime')
 
         attributions = Formatted(dict, 'attributions')
 
@@ -140,7 +141,7 @@ class ReadImporter(DataImporter):
         readbase_map = {} # cid, path: readbase_dict
         for readbase_data in readbases:
             readbase = ReadBase(**readbase_data)
-            readbase_map[readbase['cid', 'path']] = readbase
+            readbase_map[readbase.cid, readbase.path] = readbase
             readbases_to_update.append(readbase)
 
         def pre_create_readevent(read_data, readbase=None):
@@ -164,8 +165,7 @@ class ReadImporter(DataImporter):
             readevent = ReadEvent(
                 readbase=readbase,
                 datetime=read_data['datetime'],
-                progress=progress,
-                team=self.team
+                progress=progress
             )
 
             if readevent.progress:
@@ -196,6 +196,9 @@ class ReadImporter(DataImporter):
 
         ReadBase.objects.bulk_create(readbases_to_create, batch_size=settings.BATCH_SIZE_M)
         ReadBase.objects.bulk_update(readbases_to_update, ['read_rate'], batch_size=settings.BATCH_SIZE_M)
+
+        for readevent in readevents_to_create:
+            readevent.readbase_id = readevent.readbase.id
 
         ReadEvent.objects.bulk_create(readevents_to_create, batch_size=settings.BATCH_SIZE_M)
 

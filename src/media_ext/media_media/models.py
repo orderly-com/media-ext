@@ -159,7 +159,7 @@ class ReadBase(OrderBase):
     attributions = JSONField(default=dict)
 
 
-class ReadEvent(OrderBase):
+class ReadEvent(BaseModel):
     readbase = models.ForeignKey(ReadBase, on_delete=models.CASCADE)
 
     progress = models.FloatField(null=True)

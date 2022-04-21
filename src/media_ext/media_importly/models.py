@@ -40,7 +40,7 @@ class Article(RawModel):
 
     removed = models.BooleanField(default=False)
 
-    datasource = models.ForeignKey(DataSource, blank=False, default=1, on_delete=models.CASCADE)
+    datasource = models.ForeignKey(DataSource, blank=False, on_delete=models.CASCADE)
 
     attributions = JSONField(default=dict)
 
@@ -76,7 +76,7 @@ class Read(RawModel):
 
     removed = models.BooleanField(default=False)
 
-    datasource = models.ForeignKey(DataSource, blank=False, default=1, on_delete=models.CASCADE)
+    datasource = models.ForeignKey(DataSource, blank=False, on_delete=models.CASCADE)
 
     readbase = models.ForeignKey(ReadBase, blank=True, null=True, on_delete=models.CASCADE)
     readevent = models.ForeignKey(ReadEvent, blank=True, null=True, on_delete=models.CASCADE)
