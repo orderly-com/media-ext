@@ -11,10 +11,10 @@ from importly.formatters import (
 
 from datahub.data_flows import handle_data
 
-from ..extension import media_ext
-
 from ..media_media.datahub import channels
 from ..media_media.models import ArticleBase, ArticleCategory, ReadBase, ReadEvent
+
+from .formatters import format_dict
 from .models import Article, Read
 
 class ArticleDataTransfer:
@@ -113,7 +113,7 @@ class ReadDataTransfer:
 
         datetime = Formatted(parser.parse, 'datetime')
 
-        attributions = Formatted(dict, 'attributions')
+        attributions = Formatted(format_dict, 'attributions')
 
 
 class ReadImporter(DataImporter):
