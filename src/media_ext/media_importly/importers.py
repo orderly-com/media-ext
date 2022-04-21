@@ -189,7 +189,7 @@ class ReadImporter(DataImporter):
                 pre_create_readevent(read) # not proceed -> new ReadBase
 
             elif all(key_pair) and key_pair in readbase_map: # belongs to existing ReadBase -> proceed
-                pre_create_readevent(read, readbase_map[cid])
+                pre_create_readevent(read, readbase_map[key_pair])
 
             else: # is proceed but cannot find its ReadBase -> new ReadBase
                 pre_create_readevent(read)
