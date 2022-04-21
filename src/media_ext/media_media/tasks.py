@@ -1,3 +1,4 @@
+import re
 import gc
 import datetime
 
@@ -102,17 +103,26 @@ def find_article(period_from=None, period_to=None):
         articlebases = list(
             team.articlebase_set.filter(removed=False).values('id', 'location_rule')
         )
-        readbase_qs = team.readbase_set.filter(articlebase__isnull=True, datetime__gte=period_from, datetime__lte=period_to, removed=False).values('path', 'title', 'id')
-        for readbase_batch in batch_list(readbase_qs, settings.BATCH_SIZE_L):
-            readbases_to_update = []
-            for readbase_data in readbase_batch:
-                for articlebase in articlebases:
-                    is_match = media_ext.read_match_function(articlebase['location_rule'], readbase_data)
-                    if is_match:
-                        readbase = ReadBase(id=readbase_data['id'], )
-                        readbase.articlebase_id = articlebase['id']
-                        readbases_to_update.append(readbase)
+        pattern = ''
 
-            ReadBase.objects.bulk_update(readbases_to_update, ['articlebase_id'], batch_size=settings.BATCH_SIZE_M)
-            del readbases_to_update
-            gc.collect()
+        location_rule_map = {}
+        location_rules = []
+        for articlebase in articlebases:
+            location_rule_map[articlebase['location_rule']] = articlebase['id']
+            location_rules.append(articlebase['location_rule'])
+
+        pattern = '|'.join(location_rules)
+
+        readbase_qs = team.readbase_set.filter(articlebase__isnull=True, datetime__gte=period_from, datetime__lte=period_to, removed=False).values('path', 'title', 'id')
+
+        readbases_to_update = []
+        for readbase_data in readbase_qs:
+            result = re.match(pattern, readbase_data['path'])
+            if result:
+                articlebase_id = location_rule_map[result.group(0)]
+                readbase = ReadBase(id=readbase_data['id'], articlebase_id=articlebase_id)
+                readbases_to_update.append(readbase)
+
+        ReadBase.objects.bulk_update(readbases_to_update, ['articlebase_id'], batch_size=settings.BATCH_SIZE_M)
+        del readbases_to_update
+        gc.collect()
