@@ -161,8 +161,6 @@ class ReadBase(OrderBase):
 
 class ReadEvent(OrderBase):
     readbase = models.ForeignKey(ReadBase, on_delete=models.CASCADE)
-    clientbase = models.ForeignKey(ClientBase, on_delete=models.CASCADE)
-    articlebase = models.ForeignKey(ArticleBase, blank=False, null=True, on_delete=models.CASCADE)
 
     progress = models.FloatField(null=True)
     datetime = models.DateTimeField()

@@ -145,7 +145,11 @@ class ReadImporter(DataImporter):
 
         def pre_create_readevent(read_data, readbase=None):
             if readbase is None:
-                readbase = ReadBase(team=self.team, datasource=self.datasource, **read_data)
+                readbase = ReadBase(
+                    team=self.team, datasource=self.datasource,
+                    uid=read_data['uid'], cid=read_data['cid'],
+                    datetime=read_data['datetime'], path=read_data['path']
+                )
                 readbase_map[readbase.cid, readbase.path] = readbase
                 readbases_to_create.append(readbase)
 
@@ -164,7 +168,9 @@ class ReadImporter(DataImporter):
                 team=self.team
             )
 
-            readbase.read_rate = max(readbase.read_rate, readevent.progress)
+            if readevent.progress:
+                readbase.read_rate = max(readbase.read_rate, readevent.progress)
+
             readevents_to_create.append(readevent)
 
             read = Read(
