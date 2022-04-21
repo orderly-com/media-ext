@@ -108,6 +108,7 @@ class ReadDataTransfer:
         path = Formatted(str, 'path')
         uid = Formatted(str, 'uid')
         cid = Formatted(str, 'cid')
+        proceed = Formatted(lambda at: str(at) == 'proceed', 'action')
 
         datetime = Formatted(format_datetime, 'datetime')
 

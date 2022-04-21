@@ -51,6 +51,7 @@ def sync_reading_data(period_from=None, period_to=None, **kwargs):
                 'uid': row[kafka_headers.USER],
                 'cid': row[kafka_headers.CID],
                 'path': row[kafka_headers.PATH],
+                'action': row[kafka_headers.ACTION],
                 'attributions': row[kafka_headers.PARAMS],
             } for row in data
         ]
