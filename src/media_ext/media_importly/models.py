@@ -9,9 +9,11 @@ from team.models import Team
 from core.models import BaseModel, ValueTaggable
 from importly.models import RawModel
 
-from ..media_media.models import ArticleBase, ReadBase
+from ..media_media.models import ArticleBase, ReadBase, ReadEvent
+
 
 class Article(RawModel):
+
     class Meta:
         indexes = [
             models.Index(fields=['team', ]),
@@ -70,10 +72,13 @@ class Read(RawModel):
     title = models.TextField(blank=False)
     path = models.TextField(blank=False)
 
+    proceed = models.BooleanField(default=False)
+
     removed = models.BooleanField(default=False)
 
     datasource = models.ForeignKey(DataSource, blank=False, default=1, on_delete=models.CASCADE)
 
     readbase = models.ForeignKey(ReadBase, blank=True, null=True, on_delete=models.CASCADE)
+    readevent = models.ForeignKey(ReadEvent, blank=True, null=True, on_delete=models.CASCADE)
 
     attributions = JSONField(default=dict)

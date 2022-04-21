@@ -148,7 +148,7 @@ class MediaInfo(BaseModel):
 @media_ext.OrderModel
 class ReadBase(OrderBase):
     articlebase = models.ForeignKey(ArticleBase, blank=False, null=True, on_delete=models.CASCADE)
-    read_rate = models.FloatField(default=1)
+    read_rate = models.FloatField(default=0)
 
     # for articlebase
     title = models.TextField(blank=False)
@@ -157,3 +157,12 @@ class ReadBase(OrderBase):
     uid = models.TextField(blank=False)
     cid = models.TextField(blank=False)
     attributions = JSONField(default=dict)
+
+
+class ReadEvent(OrderBase):
+    readbase = models.ForeignKey(ReadBase, on_delete=models.CASCADE)
+    clientbase = models.ForeignKey(ClientBase, on_delete=models.CASCADE)
+    articlebase = models.ForeignKey(ArticleBase, blank=False, null=True, on_delete=models.CASCADE)
+
+    progress = models.FloatField(null=True)
+    datetime = models.DateTimeField()

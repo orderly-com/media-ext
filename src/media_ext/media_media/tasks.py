@@ -23,7 +23,9 @@ from ..extension import media_ext
 @media_ext.periodic_task()
 def sync_reading_data(period_from=None, period_to=None, **kwargs):
     for team in Team.objects.all():
-        params = {}
+        params = {
+            'actions': ['view', 'proceed']
+        }
         datasource, created = team.datasource_set.get_or_create(name='system')
         last_sync = team.datasync_set.filter(data_type=data_types.SYNC_READING_DATA).order_by('-datetime').first()
 
@@ -101,36 +103,17 @@ def find_article(period_from=None, period_to=None):
         articlebases = list(
             team.articlebase_set.filter(removed=False).values('id', 'location_rule')
         )
-        read_qs = team.read_set.filter(readbase__isnull=True, datetime__gte=period_from, datetime__lte=period_to).values('path', 'title', 'id', 'datetime', 'attributions', 'uid', 'cid', 'datasource')
-        for read_batch in batch_list(read_qs, settings.BATCH_SIZE_M):
-            readbases_to_create = []
-            reads_to_update = []
-
-            for read_data in read_batch:
+        readbase_qs = team.read_set.filter(articlebase__isnull=True, datetime__gte=period_from, datetime__lte=period_to).values('path', 'title', 'id')
+        for readbase_batch in batch_list(readbase_qs, settings.BATCH_SIZE_L):
+            readbases_to_update = []
+            for readbase_data in readbase_batch:
                 for articlebase in articlebases:
-                    is_match = media_ext.read_match_function(articlebase['location_rule'], read_data)
+                    is_match = media_ext.read_match_function(articlebase['location_rule'], readbase_data)
                     if is_match:
-                        readbase = ReadBase(
-                            articlebase_id=articlebase['id'],
-                            datetime=read_data['datetime'],
-                            attributions=read_data['attributions'],
-                            title=read_data['title'],
-                            path=read_data['path'],
-                            uid=read_data['uid'],
-                            cid=read_data['cid'],
-                            team=team,
-                            datasource_id=read_data['datasource']
-                        )
+                        readbase = ReadBase(id=readbase_data['id'], )
+                        readbase.articlebase_id = articlebase['id']
+                        readbases_to_update.append(readbase)
 
-                        reads_to_update.append(
-                            Read(readbase=readbase, id=read_data['id'])
-                        )
-
-                        readbases_to_create.append(readbase)
-
-            ReadBase.objects.bulk_create(readbases_to_create, batch_size=settings.BATCH_SIZE_M)
-            for read in reads_to_update:
-                read.readbase_id = read.readbase.id
-
-            Read.objects.bulk_update(reads_to_update, ['readbase_id'], batch_size=settings.BATCH_SIZE_M)
+            ReadBase.objects.bulk_update(readbases_to_update, ['articlebase_id'], batch_size=settings.BATCH_SIZE_M)
+            del readbases_to_update
             gc.collect()
