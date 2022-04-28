@@ -7,7 +7,7 @@ from importly.exceptions import EssentialDataMissing
 from config.celery import app
 from team.models import Team
 
-from .importers import ArticleDataTransfer, ArticleImporter
+from .importers import ArticleImporter
 
 @app.task(time_limit=settings.APP_TASK_TIME_LIMIT_SM)
 def process_articlelist(team_slug, data):
@@ -29,6 +29,6 @@ def process_articlelist(team_slug, data):
 
     importer.create_datalist(rows)
 
-    importer.data_to_raw_records(ArticleDataTransfer)
+    importer.data_to_raw_records()
 
     importer.process_raw_records()
