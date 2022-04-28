@@ -5,7 +5,7 @@ AUTO_LOADS = [
     'media_importly',
 ]
 
-FILE_SPECIFICATIONS = [
+DATA_SOURCES = [
     'standards'
 ]
 
