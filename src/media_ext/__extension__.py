@@ -5,4 +5,8 @@ AUTO_LOADS = [
     'media_importly',
 ]
 
+DATA_SOURCES = [
+    'standards'
+]
+
 extension = media_ext

@@ -14,8 +14,9 @@ from tag_assigner.models import TagAssigner, ValueTag
 
 from core.utils import batch_list
 
-from ..media_importly.importers import ReadImporter, ReadDataTransfer, Read
+from ..media_importly.importers import ReadImporter, Read
 from ..media_media.models import ReadBase
+from ..media_media.datahub import DataTypeSyncReadingData
 
 from .datahub import data_types
 from ..extension import media_ext
@@ -28,7 +29,7 @@ def sync_reading_data(period_from=None, period_to=None, **kwargs):
             'actions': ['view', 'proceed']
         }
         datasource, created = team.datasource_set.get_or_create(name='system')
-        last_sync = team.datasync_set.filter(data_type=data_types.SYNC_READING_DATA).order_by('-datetime').first()
+        last_sync = team.datasync_set.filter(data_type=DataTypeSyncReadingData).order_by('-datetime').first()
 
         if period_from:
             params['from_datetime'] = period_from
@@ -36,7 +37,7 @@ def sync_reading_data(period_from=None, period_to=None, **kwargs):
         elif last_sync:
             params['from_datetime'] = last_sync.datetime
 
-        datasync = DataSync.generate_next_object(team, data_type=data_types.SYNC_READING_DATA)
+        datasync = DataSync.generate_next_object(team, data_type=DataTypeSyncReadingData)
         params['to_datetime'] = datasync.datetime
 
         if period_to:
@@ -61,7 +62,7 @@ def sync_reading_data(period_from=None, period_to=None, **kwargs):
 
         importer.create_datalist(data)
 
-        importer.data_to_raw_records(ReadDataTransfer)
+        importer.data_to_raw_records()
 
         importer.process_raw_records()
 

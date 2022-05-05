@@ -11,33 +11,36 @@ from importly.formatters import (
 
 from datahub.data_flows import handle_data
 
-from ..media_media.datahub import channels
+from ..media_media.datahub import channels, DataTypeArticle, DataTypeRead
 from ..media_media.models import ArticleBase, ArticleCategory, ReadBase, ReadEvent
 
 from .formatters import format_dict
 from .models import Article, Read
 
-class ArticleDataTransfer:
-    class ArticleTransfer:
-        model = Article
-
-        external_id = Formatted(str, 'id')
-
-        author = Formatted(str, 'author')
-        title = Formatted(str, 'title')
-        content = Formatted(str, 'content')
-        path = Formatted(str, 'path')
-
-        status = Formatted(str, 'status')
-
-        datetime = Formatted(format_datetime, 'datetime')
-
-        attributions = Formatted(dict, 'attributions')
-
-        categories = Formatted(list, 'categories')
-
 
 class ArticleImporter(DataImporter):
+
+    data_type = DataTypeArticle
+
+    class DataTransfer:
+        class ArticleTransfer:
+            model = Article
+
+            external_id = Formatted(str, 'id')
+
+            author = Formatted(str, 'author')
+            title = Formatted(str, 'title')
+            content = Formatted(str, 'content')
+            path = Formatted(str, 'path')
+
+            status = Formatted(str, 'status')
+
+            datetime = Formatted(format_datetime, 'datetime')
+
+            attributions = Formatted(dict, 'attributions')
+
+            categories = Formatted(list, 'categories')
+
     def process_raw_records(self):
         articlebases_to_create = []
         articlebases_to_update = set()
@@ -101,22 +104,24 @@ class ArticleImporter(DataImporter):
                 article.articlebase.categories.add(article_category)
 
 
-class ReadDataTransfer:
-    class ReadTransfer:
-        model = Read
-
-        title = Formatted(str, 'title')
-        path = Formatted(str, 'path')
-        uid = Formatted(str, 'uid')
-        cid = Formatted(str, 'cid')
-        proceed = Formatted(lambda at: str(at) == 'proceed', 'action')
-
-        datetime = Formatted(parser.parse, 'datetime')
-
-        attributions = Formatted(format_dict, 'attributions')
-
-
 class ReadImporter(DataImporter):
+
+    data_type = DataTypeRead
+
+    class DataTransfer:
+        class ReadTransfer:
+            model = Read
+
+            title = Formatted(str, 'title')
+            path = Formatted(str, 'path')
+            uid = Formatted(str, 'uid')
+            cid = Formatted(str, 'cid')
+            proceed = Formatted(lambda at: str(at) == 'proceed', 'action')
+
+            datetime = Formatted(parser.parse, 'datetime')
+
+            attributions = Formatted(format_dict, 'attributions')
+
     def process_raw_records(self):
         '''
             A complete read behavior (ReadBase) is built by:

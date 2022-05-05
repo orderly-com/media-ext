@@ -1,10 +1,20 @@
 import re
 
+from datahub.models import DataType
+
 from ..extension import media_ext
 
 
-class data_types:
-    SYNC_READING_DATA = 'sync_reading_data'
+class DataTypeRead(DataType):
+    key = 'read'
+
+
+class DataTypeArticle(DataType):
+    key = 'article'
+
+
+class DataTypeSyncReadingData(DataType):
+    key = 'sync_reading_data'
 
 
 class channels:
