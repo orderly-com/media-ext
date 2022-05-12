@@ -6,6 +6,7 @@ from django.db.models import QuerySet, Count, Avg
 from filtration.conditions import Condition, RangeCondition, DateRangeCondition, SelectCondition, ChoiceCondition
 from filtration.models import condition
 
+from tag_assigner.models import ValueTag
 
 @condition
 class ArticleCount(RangeCondition):
@@ -37,3 +38,20 @@ class AverageReadPercentage(RangeCondition):
         q = Q(avg_read_progress__range=progress_range)
         return client_qs, q
 
+
+@condition
+class ArticleTagCondition(SelectCondition):
+    def filter(self, client_qs: QuerySet, choices: Any) -> Tuple[QuerySet, Q]:
+
+        q = Q(valuetag_ids__contains=choices)
+
+        return client_qs, q
+
+    def real_time_init(self, team, *args, **kwargs):
+        articles = list(team.articlebase_set.values_list('valuetag_ids'))
+        valuetag_ids = []
+        for article_tag_ids in articles:
+            valuetag_ids += article_tag_ids
+        data = list(ValueTag.objects.filter(id__in=valuetag_ids).values_list('id', 'name'))
+
+        self.choice(*data)
