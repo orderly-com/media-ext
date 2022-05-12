@@ -52,6 +52,6 @@ class ArticleTagCondition(SelectCondition):
         value_tag_ids = []
         for article_tag_ids in articles:
             value_tag_ids += article_tag_ids
-        data = list(ValueTag.objects.filter(id__in=value_tag_ids).values('id', text=F('name')).values_list('id', 'text'))
+        data = list(ValueTag.objects.filter(id__in=value_tag_ids).values('id', text=F('name')))
 
         self.choice(*data)
