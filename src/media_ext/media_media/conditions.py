@@ -43,15 +43,15 @@ class AverageReadPercentage(RangeCondition):
 class ArticleTagCondition(SelectCondition):
     def filter(self, client_qs: QuerySet, choices: Any) -> Tuple[QuerySet, Q]:
 
-        q = Q(valuetag_ids__contains=choices)
+        q = Q(value_tag_ids__contains=choices)
 
         return client_qs, q
 
     def real_time_init(self, team, *args, **kwargs):
-        articles = list(team.articlebase_set.values_list('valuetag_ids'))
-        valuetag_ids = []
+        articles = list(team.articlebase_set.values_list('value_tag_ids'))
+        value_tag_ids = []
         for article_tag_ids in articles:
-            valuetag_ids += article_tag_ids
-        data = list(ValueTag.objects.filter(id__in=valuetag_ids).values_list('id', 'name'))
+            value_tag_ids += article_tag_ids
+        data = list(ValueTag.objects.filter(id__in=value_tag_ids).values_list('id', 'name'))
 
         self.choice(*data)
