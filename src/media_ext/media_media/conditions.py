@@ -1,7 +1,7 @@
 from typing import Any, Tuple
 
 from django.db.models.query import Q
-from django.db.models import QuerySet, Count, Avg
+from django.db.models import QuerySet, Count, Avg, F
 
 from filtration.conditions import Condition, RangeCondition, DateRangeCondition, SelectCondition, ChoiceCondition
 from filtration.models import condition
@@ -52,6 +52,6 @@ class ArticleTagCondition(SelectCondition):
         value_tag_ids = []
         for article_tag_ids in articles:
             value_tag_ids += article_tag_ids
-        data = list(ValueTag.objects.filter(id__in=value_tag_ids).values_list('id', 'name'))
+        data = list(ValueTag.objects.filter(id__in=value_tag_ids).values_list('id', text=F('name')))
 
         self.choice(*data)
