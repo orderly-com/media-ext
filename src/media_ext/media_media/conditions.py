@@ -1,16 +1,10 @@
-import re
-import datetime
-
-from typing import Any, Tuple, Optional, Dict, List
-from dateutil.relativedelta import relativedelta
+from typing import Any, Tuple
 
 from django.db.models.query import Q
 from django.db.models import QuerySet, Count, Avg
 
 from filtration.conditions import Condition, RangeCondition, DateRangeCondition, SelectCondition, ChoiceCondition
-from team.models import Attribution
 from filtration.models import condition
-from ..extension import media
 
 
 @condition
