@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 from django.db.models.query import Q
 from django.db.models import QuerySet, Count, Avg
 
-from client_filter.conditions import Condition, RangeCondition, DateRangeCondition, SelectCondition, ChoiceCondition
+from filtration.conditions import Condition, RangeCondition, DateRangeCondition, SelectCondition, ChoiceCondition
 from team.models import Attribution
 from filtration.models import condition
 from ..extension import media
