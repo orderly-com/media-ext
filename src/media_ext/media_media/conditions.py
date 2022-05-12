@@ -48,7 +48,7 @@ class ArticleTagCondition(SelectCondition):
         return client_qs, q
 
     def real_time_init(self, team, *args, **kwargs):
-        articles = list(team.articlebase_set.values_list('value_tag_ids'))
+        articles = list(team.articlebase_set.values_list('value_tag_ids', flat=True))
         value_tag_ids = []
         for article_tag_ids in articles:
             value_tag_ids += article_tag_ids
