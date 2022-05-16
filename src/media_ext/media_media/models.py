@@ -129,10 +129,10 @@ class MediaInfo(BaseModel):
         return total_read_rate
 
     def get_count_of_total_article(self):
-        return self.clientbase.readbase_set.filter(removed=False).values('path').count()
+        return self.clientbase.readbase_set.filter(removed=False, articlebase__isnull=False).values('path').count()
 
     def get_avg_of_each_read(self):
-        qs = self.clientbase.readbase_set.filter(removed=False)
+        qs = self.clientbase.readbase_set.filter(removed=False, articlebase__isnull=False)
         if not qs.count():
             return 0
 
@@ -142,7 +142,7 @@ class MediaInfo(BaseModel):
         return total_read_rate / qs.count()
 
     def get_times_of_read(self):
-        return self.clientbase.readbase_set.filter(removed=False).count()
+        return self.clientbase.readbase_set.filter(removed=False, articlebase__isnull=False).count()
 
     def first_read(self):
         first_readbase = self.clientbase.readbase_set.filter(removed=False, articlebase__isnull=False).order_by('datetime').first()
