@@ -15,12 +15,12 @@
             <tr class="row">
                 <td class="col-md-4">瀏覽排名</td>
                 <td class="col-md-8">
-                    {% with clientbase.get_total_spent_rank as total_spent_rank %}
+                    {% with clientbase.get_total_read_rank as total_read_rank %}
 
-                    {% if total_spent_rank %}
+                    {% if total_read_rank %}
                         <div class="">
                             <span>#</span>
-                            <span class="text-semibold text-yellow h1">{{ total_spent_rank|floatformat:0|int_format }}</span>
+                            <span class="text-semibold text-yellow h1">{{ total_read_rank|floatformat:0|int_format }}</span>
                         </div>
                     {% else %}
                         <div>--</div>

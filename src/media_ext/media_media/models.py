@@ -145,10 +145,18 @@ class MediaInfo(BaseModel):
         return self.clientbase.readbase_set.filter(removed=False).count()
 
     def first_read(self):
-        return self.clientbase.readbase_set.filter(removed=False).order_by('datetime').first().datetime
+        first_readbase = self.clientbase.readbase_set.filter(removed=False, articlebase__isnull=False).order_by('datetime').first()
+        if first_readbase:
+            return first_readbase.datetime
+        else:
+            return None
 
     def last_read(self):
-        return self.clientbase.readbase_set.filter(removed=False).order_by('datetime').last().datetime
+        last_readbase = self.clientbase.readbase_set.filter(removed=False, articlebase__isnull=False).order_by('datetime').last()
+        if last_readbase:
+            return last_readbase.datetime
+        else:
+            return None
 
 
 @media_ext.OrderModel
