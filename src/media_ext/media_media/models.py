@@ -144,6 +144,12 @@ class MediaInfo(BaseModel):
     def get_times_of_read(self):
         return self.clientbase.readbase_set.filter(removed=False).count()
 
+    def first_read(self):
+        return self.clientbase.readbase_set.filter(removed=False).order_by('datetime').first().datetime
+
+    def last_read(self):
+        return self.clientbase.readbase_set.filter(removed=False).order_by('datetime').last().datetime
+
 
 @media_ext.OrderModel
 class ReadBase(OrderBase):

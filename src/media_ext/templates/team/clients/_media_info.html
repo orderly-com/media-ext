@@ -10,7 +10,7 @@
             <div class="heading-elements"></div>
         </div>
 
-        <table class="table" id="purchase_profile">
+        <table class="table" id="read_profile">
 
             <tr class="row">
                 <td class="col-md-4">瀏覽排名</td>
@@ -41,10 +41,10 @@
 
             <tr class="row">
                 <td>首次閱讀</td>
-                <td id="first_purchase_date">
-                    {% if clientbase.first_purchase is not None %}
-                        <div class="">{{ clientbase.first_purchase|date:"Y-m-d" }}</div>
-                        <div class="text-muted">約 <span id="first_purchase_data">{{ clientbase.first_purchase.isoformat }}</span> 前</div>
+                <td id="first_read_date">
+                    {% if clientbase.first_read is not None %}
+                        <div class="">{{ clientbase.first_read|date:"Y-m-d" }}</div>
+                        <div class="text-muted">約 <span id="first_read_data">{{ clientbase.first_read.isoformat }}</span> 前</div>
                     {% else %}
                         <div>暫無瀏覽紀錄</div>
                     {% endif %}
@@ -53,10 +53,10 @@
 
             <tr class="row">
                 <td>最近閱讀</td>
-                <td id="last_purchase_date">
-                    {% if clientbase.last_purchase is not None %}
-                        <div class="">{{ clientbase.last_purchase|date:"Y-m-d" }}</div>
-                        <div class="text-muted">約 <span id="last_purchase_data">{{ clientbase.last_purchase.isoformat }}</span> 前</div>
+                <td id="last_read_date">
+                    {% if clientbase.last_read is not None %}
+                        <div class="">{{ clientbase.last_read|date:"Y-m-d" }}</div>
+                        <div class="text-muted">約 <span id="last_read_data">{{ clientbase.last_read.isoformat }}</span> 前</div>
                     {% else %}
                         <div>暫無瀏覽紀錄</div>
                     {% endif %}
@@ -87,8 +87,8 @@
             <tr class="row">
                 <td>回站周期</td>
                 <td>
-                    {% if clientbase.avg_repurchase_days > 0 %}
-                        <div class="">{{ clientbase.media_info.avg_repurchase_days|floatformat:2|int_format }} 天</div>
+                    {% if clientbase.avg_reread_days > 0 %}
+                        <div class="">{{ clientbase.media_info.avg_reread_days|floatformat:2|int_format }} 天</div>
                     {% else %}
                         無瀏覽紀錄
                     {% endif %}
