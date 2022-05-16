@@ -35,16 +35,16 @@
                 <td class="col-md-4">加入時間</td>
                 <td class="col-md-8" id="join_date">
                     <div class="">{{ clientbase.join_datetime|date:"Y-m-d" }}</div>
-                    <div class="text-muted">約 <span id="join_data">{{ clientbase.join_datetime.isoformat }}</span> 前</div>
+                    <div class="text-muted">約 <span id="join_data">{{ clientbase.join_datetime|trans_duration }}</span> 前</div>
                 </td>
             </tr>
 
             <tr class="row">
                 <td>首次閱讀</td>
                 <td id="first_read_date">
-                    {% if clientbase.first_read is not None %}
-                        <div class="">{{ clientbase.first_read|date:"Y-m-d" }}</div>
-                        <div class="text-muted">約 <span id="first_read_data">{{ clientbase.first_read.isoformat }}</span> 前</div>
+                    {% if clientbase.media_info.first_read is not None %}
+                        <div class="">{{ clientbase.media_info.first_read|date:"Y-m-d" }}</div>
+                        <div class="text-muted">約 <span id="first_read_data">{{ clientbase.media_info.first_read|trans_duration }}</span> 前</div>
                     {% else %}
                         <div>暫無瀏覽紀錄</div>
                     {% endif %}
@@ -54,9 +54,10 @@
             <tr class="row">
                 <td>最近閱讀</td>
                 <td id="last_read_date">
-                    {% if clientbase.last_read is not None %}
-                        <div class="">{{ clientbase.last_read|date:"Y-m-d" }}</div>
-                        <div class="text-muted">約 <span id="last_read_data">{{ clientbase.last_read.isoformat }}</span> 前</div>
+                    {{ clientbase.media_info.last_read }}
+                    {% if clientbase.media_info.last_read is not None %}
+                        <div class="">{{ clientbase.media_info.last_read|date:"Y-m-d" }}</div>
+                        <div class="text-muted">約 <span id="last_read_data">{{ clientbase.media_info.last_read|trans_duration }}</span> 前</div>
                     {% else %}
                         <div>暫無瀏覽紀錄</div>
                     {% endif %}
@@ -81,17 +82,6 @@
                 <td>平均瀏覽比率</td>
                 <td>
                     <div class="">{{ clientbase.media_info.get_avg_of_each_read|percent:1 }} %</div>
-                </td>
-            </tr>
-
-            <tr class="row">
-                <td>回站周期</td>
-                <td>
-                    {% if clientbase.avg_reread_days > 0 %}
-                        <div class="">{{ clientbase.media_info.avg_reread_days|floatformat:2|int_format }} 天</div>
-                    {% else %}
-                        無瀏覽紀錄
-                    {% endif %}
                 </td>
             </tr>
 
