@@ -54,7 +54,6 @@
             <tr class="row">
                 <td>最近閱讀</td>
                 <td id="last_read_date">
-                    {{ clientbase.media_info.last_read }}
                     {% if clientbase.media_info.last_read is not None %}
                         <div class="">{{ clientbase.media_info.last_read|date:"Y-m-d" }}</div>
                         <div class="text-muted">約 <span id="last_read_data">{{ clientbase.media_info.last_read|trans_duration }}</span> 前</div>
