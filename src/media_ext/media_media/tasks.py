@@ -18,7 +18,6 @@ from ..media_importly.importers import ReadImporter, Read
 from ..media_media.models import ReadBase
 from ..media_media.datahub import DataTypeSyncReadingData
 
-from .datahub import data_types
 from ..extension import media_ext
 
 
