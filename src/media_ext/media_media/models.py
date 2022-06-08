@@ -161,6 +161,14 @@ class MediaInfo(BaseModel):
 
 @media_ext.OrderModel
 class ReadBase(OrderBase):
+    class Meta:
+        indexes = [
+            models.Index(fields=['team', 'articlebase']),
+            models.Index(fields=['team', 'clientbase']),
+            models.Index(fields=['articlebase']),
+            models.Index(fields=['clientbase']),
+        ]
+
     articlebase = models.ForeignKey(ArticleBase, blank=False, null=True, on_delete=models.CASCADE)
     read_rate = models.FloatField(default=0)
 
