@@ -10,6 +10,14 @@ class MediaExtension(Extension):
         self.read_match_function = lambda: False
         self.read_match_policy_level = -1
 
+    def define_mongodb_collections(self):
+        return {
+            'readbases':
+            {
+                'indexes': ['cid', 'progress', 'clientbase_id', 'productbase_id']
+            },
+        }
+
     def read_match_policy(self, level=0):
 
         def registry(function):
