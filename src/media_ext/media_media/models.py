@@ -3,7 +3,6 @@ import html2text
 from uuid import uuid4
 
 from django.db import models
-from django.db.models import Sum
 from django.contrib.postgres.fields import JSONField, ArrayField
 
 from datahub.models import DataSource
@@ -11,6 +10,8 @@ from datahub.models import DataSource
 from core.models import BaseModel, ValueTaggable
 from team.models import Team, OrderBase, ProductBase, ClientBase, client_info_model
 from tag_assigner.utils import api_taggable
+
+from cerem.utils import TeamMongoDB, F, Sum
 
 from ..extension import media_ext
 
@@ -49,6 +50,10 @@ class ArticleBase(ProductBase):
             models.Index(fields=['team', 'datasource']),
             models.Index(fields=['team', 'title']),
         ]
+
+    def __getattr__(self, attr):
+        if attr == 'readbase_set':
+            return TeamMongoDB(self.team).readbases.filter(articlebase_id=self.id)
 
     datetime = models.DateTimeField(blank=True, null=True)
 
@@ -100,7 +105,7 @@ class ArticleBase(ProductBase):
 
     def get_latest_reader(self):
         clientbase = None
-        readbase = self.readbase_set.filter(removed=False).order_by('-c_at').first()
+        readbase = self.readbase_set.order_by('-c_at').first()
         if readbase:
             clientbase = readbase.clientbase
 
@@ -118,71 +123,46 @@ class MediaInfo(BaseModel):
 
     clientbase = models.OneToOneField(ClientBase, related_name='media_info', blank=False, on_delete=models.CASCADE)
 
+    def __getattr__(self, attr):
+        if attr == 'readbase_set':
+            return TeamMongoDB(self.clientbase.team).readbases.filter(clientbase_id=self.clientbase_id)
+
     def get_sum_of_total_read(self):
-        qs = self.clientbase.readbase_set.filter(removed=False)
+        qs = self.clientbase.media_info.readbase_set
 
-        data = qs.aggregate(total_read_rate=Sum('read_rate'))
-        total_read_rate = data.get('total_read_rate', 0)
-        if total_read_rate is None:
-            total_read_rate = 0
+        data = qs.aggregate(total_progress=Sum('progress'))
+        total_progress = data.get('total_progress', 0)
+        if total_progress is None:
+            total_progress = 0
 
-        return total_read_rate
+        return total_progress
 
     def get_count_of_total_article(self):
-        return self.clientbase.readbase_set.filter(removed=False, articlebase__isnull=False).values('path').count()
+        return self.clientbase.media_info.readbase_set.filter(F('articlebase_id') != None).values('path').count()
 
     def get_avg_of_each_read(self):
-        qs = self.clientbase.readbase_set.filter(removed=False, articlebase__isnull=False)
+        qs = self.clientbase.media_info.readbase_set.filter(F('articlebase_id') != None)
         if not qs.count():
             return 0
 
-        data = qs.aggregate(total_read_rate=Sum('read_rate'))
-        total_read_rate = data.get('total_read_rate', 0)
+        data = qs.aggregate(total_progress=Sum('progress'))
+        total_progress = data.get('total_progress', 0)
 
-        return total_read_rate / qs.count()
+        return total_progress / qs.count()
 
     def get_times_of_read(self):
-        return self.clientbase.readbase_set.filter(removed=False, articlebase__isnull=False).count()
+        return self.clientbase.media_info.readbase_set.filter(F('articlebase_id') != None).count()
 
     def first_read(self):
-        first_readbase = self.clientbase.readbase_set.filter(removed=False, articlebase__isnull=False).order_by('datetime').first()
+        first_readbase = self.clientbase.media_info.readbase_set.filter(F('articlebase_id') != None).order_by('datetime').first()
         if first_readbase:
             return first_readbase.datetime
         else:
             return None
 
     def last_read(self):
-        last_readbase = self.clientbase.readbase_set.filter(removed=False, articlebase__isnull=False).order_by('datetime').last()
+        last_readbase = self.clientbase.media_info.readbase_set.filter(F('articlebase_id') != None).order_by('datetime').last()
         if last_readbase:
             return last_readbase.datetime
         else:
             return None
-
-
-@media_ext.OrderModel
-class ReadBase(OrderBase):
-    class Meta:
-        indexes = [
-            models.Index(fields=['team', 'articlebase']),
-            models.Index(fields=['team', 'clientbase']),
-            models.Index(fields=['articlebase']),
-            models.Index(fields=['clientbase']),
-        ]
-
-    articlebase = models.ForeignKey(ArticleBase, blank=False, null=True, on_delete=models.CASCADE)
-    read_rate = models.FloatField(default=0)
-
-    # for articlebase
-    title = models.TextField(blank=False)
-    path = models.TextField(blank=False)
-
-    uid = models.TextField(blank=False)
-    cid = models.TextField(blank=False)
-    attributions = JSONField(default=dict)
-
-
-class ReadEvent(BaseModel):
-    readbase = models.ForeignKey(ReadBase, on_delete=models.CASCADE)
-
-    progress = models.FloatField(null=True)
-    datetime = models.DateTimeField()

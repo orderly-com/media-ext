@@ -16,8 +16,6 @@ from core.utils import batch_list
 
 from cerem.tasks import insert_to_cerem, aggregate_from_cerem
 
-from ..media_importly.importers import ReadImporter, Read
-from ..media_media.models import ReadBase
 from ..media_media.datahub import DataTypeSyncReadingData
 
 from ..extension import media_ext
@@ -59,7 +57,6 @@ def sync_reading_data(period_from=None, period_to=None, **kwargs):
             datasync.datetime = period_to
             datasync.save()
 
-        data = fetch_site_tracking_data(team, **params)
         readbases = []
         readbase_map = {}
         def create_readbase(event):
@@ -81,6 +78,11 @@ def sync_reading_data(period_from=None, period_to=None, **kwargs):
             return readbase
 
         def append_readevent(readbase, event):
+            try:
+                event['params'] = json.loads(event['params'])
+            except:
+                event['params'] = {}
+
             readbase['events'].append(
                 {
                     'datetime': event['datetime'],
@@ -91,7 +93,7 @@ def sync_reading_data(period_from=None, period_to=None, **kwargs):
             if 'percentage' in event['params']:
                 readbase['progress'] = max(readbase['progress'], event['params']['percentage'] / 100)
 
-        for row in data:
+        for row in fetch_site_tracking_data(team, **params):
             event = {
                 'datetime': row[kafka_headers.DATETIME],
                 'title': row[kafka_headers.TITLE],

@@ -12,10 +12,10 @@ from importly.formatters import (
 from datahub.data_flows import handle_data
 
 from ..media_media.datahub import channels, DataTypeArticle, DataTypeRead
-from ..media_media.models import ArticleBase, ArticleCategory, ReadBase, ReadEvent
+from ..media_media.models import ArticleBase, ArticleCategory
 
 from .formatters import format_dict
-from .models import Article, Read
+from .models import Article
 
 
 class ArticleImporter(DataImporter):
@@ -102,113 +102,3 @@ class ArticleImporter(DataImporter):
                     article_category.save(update_fields=['name'])
 
                 article.articlebase.categories.add(article_category)
-
-
-class ReadImporter(DataImporter):
-
-    data_type = DataTypeRead
-
-    class DataTransfer:
-        class ReadTransfer:
-            model = Read
-
-            title = Formatted(str, 'title')
-            path = Formatted(str, 'path')
-            uid = Formatted(str, 'uid')
-            cid = Formatted(str, 'cid')
-            proceed = Formatted(lambda at: str(at) == 'proceed', 'action')
-
-            datetime = Formatted(parser.parse, 'datetime')
-
-            attributions = Formatted(format_dict, 'attributions')
-
-    def process_raw_records(self):
-        '''
-            A complete read behavior (ReadBase) is built by:
-            view, proceed, proceed, ... with same cid and path
-            So a ReadBase is basically a view event, and its readevents are just proceed events
-        '''
-        period_from = self.datalist.read_set.aggregate(min_datetime=Min('datetime')).get('min_datetime')
-        if period_from:
-            readbases = list(
-                self.team.readbase_set
-                    .filter(datetime__range=[period_from - datetime.timedelta(hours=1), period_from])
-                    .values('cid', 'datetime', 'id', 'path')
-            )
-        else:
-            readbases = []
-
-        readbases_to_create = [] # new readbases
-        readbases_to_update = [] # update read_rate
-        readevents_to_create = [] # new readevents
-        reads_to_update = [] # update read.readbase and read.readevent
-
-        readbase_map = {} # cid, path: readbase_dict
-        for readbase_data in readbases:
-            readbase = ReadBase(**readbase_data)
-            readbase_map[readbase.cid, readbase.path] = readbase
-            readbases_to_update.append(readbase)
-
-        def pre_create_readevent(read_data, readbase=None):
-            if readbase is None:
-                readbase = ReadBase(
-                    team=self.team, datasource=self.datasource,
-                    uid=read_data['uid'], cid=read_data['cid'],
-                    datetime=read_data['datetime'], path=read_data['path']
-                )
-                readbase_map[readbase.cid, readbase.path] = readbase
-                readbases_to_create.append(readbase)
-
-            try:
-                progress = float(read_data['attributions']['percentage']) / 100
-            except:
-                progress = None
-
-            if not readbase.uid:
-                readbase.uid = read_data['uid']
-
-            readevent = ReadEvent(
-                readbase=readbase,
-                datetime=read_data['datetime'],
-                progress=progress
-            )
-
-            if readevent.progress:
-                readbase.read_rate = max(readbase.read_rate, readevent.progress)
-
-            readevents_to_create.append(readevent)
-
-            read = Read(
-                id = read_data['id'],
-                readevent=readevent,
-                readbase=readbase
-            )
-            reads_to_update.append(read)
-
-        for read in self.datalist.read_set.values('proceed', 'datetime', 'cid', 'path', 'attributions', 'id', 'uid').order_by('datetime'):
-            cid = read['cid']
-            path = read['path']
-            key_pair = (cid, path)
-
-            if read['proceed'] is False:
-                pre_create_readevent(read) # not proceed -> new ReadBase
-
-            elif all(key_pair) and key_pair in readbase_map: # belongs to existing ReadBase -> proceed
-                pre_create_readevent(read, readbase_map[key_pair])
-
-            else: # is proceed but cannot find its ReadBase -> new ReadBase
-                pre_create_readevent(read)
-
-        ReadBase.objects.bulk_create(readbases_to_create, batch_size=settings.BATCH_SIZE_M)
-        ReadBase.objects.bulk_update(readbases_to_update, ['read_rate'], batch_size=settings.BATCH_SIZE_M)
-
-        for readevent in readevents_to_create:
-            readevent.readbase_id = readevent.readbase.id
-
-        ReadEvent.objects.bulk_create(readevents_to_create, batch_size=settings.BATCH_SIZE_M)
-
-        for read in reads_to_update:
-            read.readbase_id = read.readbase.id
-            read.readevent_id = read.readevent.id
-
-        Read.objects.bulk_update(reads_to_update, ['readbase_id', 'readevent_id'], batch_size=settings.BATCH_SIZE_M)

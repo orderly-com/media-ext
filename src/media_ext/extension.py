@@ -30,18 +30,12 @@ class MediaExtension(Extension):
 
     def get_clientbase_behaviors(self, clientbase):
         behaviors = []
-
-        read_qs = (clientbase.readbase_set.filter(removed=False)
-            .values('datetime__date', 'articlebase__title', 'articlebase__path')
-            .annotate(from_datetime=Min('datetime'), to_datetime=Max('datetime'), rate=Max('read_rate'))
-        ).order_by('from_datetime')
+        read_qs = clientbase.media_info.readbase_set.values('datetime', 'title', 'path').order_by('datetime')
 
         for item in read_qs:
-            from_datetime = item['from_datetime']
-            to_datetime = item['to_datetime']
-            value = item['articlebase__title']
+            value = item['title']
             rate = item['rate']
-            path = item['articlebase__path']
+            path = item['path']
             if not value:
                 value = '--'
 
@@ -50,7 +44,7 @@ class MediaExtension(Extension):
 
 
             obj = {
-                'datetime': from_datetime,
+                'datetime': item['datetime'],
                 'trigger_by': 'client',
                 'action': '閱讀',
                 'value': '',
