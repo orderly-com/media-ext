@@ -34,17 +34,17 @@ class MediaExtension(Extension):
 
     def get_clientbase_behaviors(self, clientbase):
         behaviors = []
-        read_qs = clientbase.media_info.readbase_set.values('datetime', 'title', 'path').order_by('datetime')
+        read_qs = clientbase.media_info.readbase_set.values('datetime', 'title', 'path', 'progress').order_by('datetime')
 
         for item in read_qs:
             value = item['title']
-            rate = item['rate']
+            rate = item['progress']
             path = item['path']
             if not value:
                 value = '--'
 
             if path:
-                value = f'<a class="text-info" href="{path}">{value}</a> ({rate*100}%)'
+                value = f'<a class="text-info" href="{ path }">{ value }</a> ({ rate*100 }%)'
 
 
             obj = {

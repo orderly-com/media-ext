@@ -67,7 +67,11 @@
 
                                         {# 網址 #}
                                         <td>
-                                            {{ readbase.path }}
+                                            {% if readbase.path %}
+                                                <a class="text-info" href="{{ readbase.path }}">{{ readbase.path }}</a>
+                                            {% else %}
+                                                --
+                                            {% endif %}
                                         </td>
 
                                         {# 閱讀率 #}
@@ -79,7 +83,7 @@
 
                                         {# 時間 #}
                                         <td>
-                                            <div class="text-right">{{ readbase.datetime|date:'Y-m-d H:i' }}</div>
+                                            <div class="text-right">{{ readbase.datetime }}</div>
                                         </td>
                                     </tr>
 

@@ -25,7 +25,7 @@ from ..extension import media_ext
 def sync_reading_data(period_from=None, period_to=None, **kwargs):
     for team in Team.objects.all():
         articlebases = list(
-            team.articlebase_set.filter(removed=False).values('id', 'location_rule')
+            team.articlebase_set.filter(removed=False, location_rule__isnull=False).exclude(location_rule='').values('id', 'location_rule')
         )
         pattern = ''
 
@@ -36,6 +36,8 @@ def sync_reading_data(period_from=None, period_to=None, **kwargs):
             location_rules.append(articlebase['location_rule'])
 
         pattern = '|'.join(location_rules)
+        if not pattern:
+            return
 
         params = {
             'actions': ['view', 'proceed']
