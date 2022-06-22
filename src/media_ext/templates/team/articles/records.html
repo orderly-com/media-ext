@@ -67,13 +67,17 @@
 
                                         {# 網址 #}
                                         <td>
-                                            {{ readbase.path }}
+                                            {% if readbase.path %}
+                                                <a class="text-info" href="{{ readbase.path }}">{{ readbase.path }}</a>
+                                            {% else %}
+                                                --
+                                            {% endif %}
                                         </td>
 
                                         {# 閱讀率 #}
                                         <td>
                                             <div class="text-center">
-                                                {{ readbase.read_rate|percent:1 }} <span class="text-muted text-size-small">%</span>
+                                                {{ readbase.progress|percent:1 }} <span class="text-muted text-size-small">%</span>
                                             </div>
                                         </td>
 

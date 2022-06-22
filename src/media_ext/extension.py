@@ -10,6 +10,18 @@ class MediaExtension(Extension):
         self.read_match_function = lambda: False
         self.read_match_policy_level = -1
 
+    def define_mongodb_collections(self):
+        return {
+            'readbases':
+            {
+                'indexes': ['cid', 'progress', 'clientbase_id', 'productbase_id'],
+                'schema': {
+                    'datetime': {'type': 'datetime'},
+                    'events.datetime': {'type': 'datetime'}
+                }
+            },
+        }
+
     def read_match_policy(self, level=0):
 
         def registry(function):
@@ -22,27 +34,21 @@ class MediaExtension(Extension):
 
     def get_clientbase_behaviors(self, clientbase):
         behaviors = []
-
-        read_qs = (clientbase.readbase_set.filter(removed=False)
-            .values('datetime__date', 'articlebase__title', 'articlebase__path')
-            .annotate(from_datetime=Min('datetime'), to_datetime=Max('datetime'), rate=Max('read_rate'))
-        ).order_by('from_datetime')
+        read_qs = clientbase.media_info.readbase_set.values('datetime', 'title', 'path', 'progress').order_by('datetime')
 
         for item in read_qs:
-            from_datetime = item['from_datetime']
-            to_datetime = item['to_datetime']
-            value = item['articlebase__title']
-            rate = item['rate']
-            path = item['articlebase__path']
+            value = item['title']
+            rate = item['progress']
+            path = item['path']
             if not value:
                 value = '--'
 
             if path:
-                value = f'<a class="text-info" href="{path}">{value}</a> ({rate*100}%)'
+                value = f'<a class="text-info" href="{ path }">{ value }</a> ({ rate*100 }%)'
 
 
             obj = {
-                'datetime': from_datetime,
+                'datetime': item['datetime'],
                 'trigger_by': 'client',
                 'action': '閱讀',
                 'value': '',
