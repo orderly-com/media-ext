@@ -5,21 +5,87 @@ from django.db.models import QuerySet, Count, Avg, F
 
 from filtration.conditions import Condition, RangeCondition, DateRangeCondition, SelectCondition, ChoiceCondition
 from filtration.models import condition
+from filtration.exceptions import UseIdList
 
 from tag_assigner.models import ValueTag
+
+from cerem.tasks import aggregate_from_cerem
+
 
 @condition
 class ArticleCount(RangeCondition):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.range(0, 100)
+        self.range(0, 20)
         self.config(postfix='篇')
 
     def filter(self, client_qs: QuerySet, article_count_range: Any) -> Tuple[QuerySet, Q]:
-        client_qs = client_qs.annotate(article_count=Count('readbase__articlebase__id', distinct=True))
+        val_min, val_max = article_count_range
+        pipeline = [
+            {
+                '$match': {
+                    'clientbase_id': {
+                        '$ne': None
+                    },
+                    'articlebase_id': {
+                        '$ne': None
+                    }
+                }
+            }, {
+                '$group': {
+                    '_id': '$clientbase_id',
+                    'articles': {
+                        '$addToSet': '$articlebase_id'
+                    },
+                }
+            }, {
+                '$addFields': {
+                    'article_count': {
+                        '$size': '$articles'
+                    }
+                }
+            }, {
+                '$match': {
+                    'article_count': {
+                        '$gte': val_min,
+                        '$lte': val_max
+                    }
+                }
+            }, {
+                '$project': {
+                    '_id': 1,
+                }
+            }
+        ]
+        result = aggregate_from_cerem(self.team.id, 'readbases', pipeline)
+        id_list = set([item['_id'] for item in result])
 
-        q = Q(article_count__range=article_count_range)
-        return client_qs, q
+        if val_min == 0: # find clients having no records
+            pipeline = [
+                {
+                    '$match': {
+                        'clientbase_id': {
+                            '$ne': None
+                        },
+                        'articlebase_id': {
+                            '$ne': None
+                        }
+                    }
+                }, {
+                    '$group': {
+                        '_id': None,
+                        'clients': {
+                            '$addToSet': '$clientbase_id'
+                        },
+                    }
+                }
+            ]
+            result = aggregate_from_cerem(self.team.id, 'readbases', pipeline)
+            no_record_ids = result[0]['clients']
+            original_pool = set(client_qs.values_list('id', flat=True))
+            id_list = id_list.union(original_pool) - set(no_record_ids)
+
+        raise UseIdList(id_list)
 
 
 @condition
@@ -30,13 +96,66 @@ class AverageReadPercentage(RangeCondition):
         self.config(postfix='%')
 
     def filter(self, client_qs: QuerySet, avg_read_percentage_range: Any) -> Tuple[QuerySet, Q]:
-        percentage_min, percentage_max = avg_read_percentage_range
-        progress_range = (percentage_min/100, percentage_max/100)
+        val_min, val_max = article_count_range
+        pipeline = [
+            {
+                '$match': {
+                    'clientbase_id': {
+                        '$ne': None
+                    },
+                    'articlebase_id': {
+                        '$ne': None
+                    }
+                }
+            }, {
+                '$group': {
+                    '_id': '$clientbase_id',
+                    'avg_progress': {
+                        '$avg': '$progress'
+                    },
+                }
+            }, {
+                '$match': {
+                    'avg_progress': {
+                        '$gte': val_min,
+                        '$lte': val_max
+                    }
+                }
+            }, {
+                '$project': {
+                    '_id': 1,
+                }
+            }
+        ]
+        result = aggregate_from_cerem(self.team.id, 'readbases', pipeline)
+        id_list = [item['_id'] for item in result]
 
-        client_qs = client_qs.annotate(avg_read_progress=Avg('readbase__read_rate'))
+        if val_min == 0: # find clients having no records
+            pipeline = [
+                {
+                    '$match': {
+                        'clientbase_id': {
+                            '$ne': None
+                        },
+                        'articlebase_id': {
+                            '$ne': None
+                        }
+                    }
+                }, {
+                    '$group': {
+                        '_id': None,
+                        'clients': {
+                            '$addToSet': '$clientbase_id'
+                        },
+                    }
+                }
+            ]
+            result = aggregate_from_cerem(self.team.id, 'readbases', pipeline)
+            no_record_ids = result[0]['clients']
+            original_pool = set(client_qs.values_list('id', flat=True))
+            id_list = id_list.union(original_pool) - set(no_record_ids)
 
-        q = Q(avg_read_progress__range=progress_range)
-        return client_qs, q
+        raise UseIdList(id_list)
 
 
 @condition

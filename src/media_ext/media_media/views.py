@@ -240,7 +240,7 @@ class ArticleDetailView(
 
         self.datasource = articlebase.datasource
         self.articlebase = articlebase
-        self.readbases = articlebase.readbase_set.filter(removed=False)
+        self.readbases = articlebase.readbase_set
 
         return super().get(request, *args, **kwargs)
 
