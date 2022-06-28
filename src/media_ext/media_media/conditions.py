@@ -96,7 +96,7 @@ class AverageReadPercentage(RangeCondition):
         self.config(postfix='%')
 
     def filter(self, client_qs: QuerySet, avg_read_percentage_range: Any) -> Tuple[QuerySet, Q]:
-        val_min, val_max = article_count_range
+        val_min, val_max = avg_read_percentage_range
         pipeline = [
             {
                 '$match': {
