@@ -128,7 +128,7 @@ class AverageReadPercentage(RangeCondition):
             }
         ]
         result = aggregate_from_cerem(self.team.id, 'readbases', pipeline)
-        id_list = [item['_id'] for item in result]
+        id_list = set([item['_id'] for item in result])
 
         if val_min == 0: # find clients having no records
             pipeline = [
