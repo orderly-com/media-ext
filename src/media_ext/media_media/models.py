@@ -156,13 +156,13 @@ class MediaInfo(BaseModel):
     def first_read(self):
         first_readbase = self.clientbase.media_info.readbase_set.filter(F('articlebase_id') != None).order_by('datetime').first()
         if first_readbase:
-            return first_readbase.datetime
+            return first_readbase['datetime']
         else:
             return None
 
     def last_read(self):
         last_readbase = self.clientbase.media_info.readbase_set.filter(F('articlebase_id') != None).order_by('datetime').last()
         if last_readbase:
-            return last_readbase.datetime
+            return last_readbase['datetime']
         else:
             return None
