@@ -20,72 +20,7 @@ class ArticleCount(RangeCondition):
         self.config(postfix='篇')
 
     def filter(self, client_qs: QuerySet, article_count_range: Any) -> Tuple[QuerySet, Q]:
-        val_min, val_max = article_count_range
-        pipeline = [
-            {
-                '$match': {
-                    'clientbase_id': {
-                        '$ne': None
-                    },
-                    'articlebase_id': {
-                        '$ne': None
-                    }
-                }
-            }, {
-                '$group': {
-                    '_id': '$clientbase_id',
-                    'articles': {
-                        '$addToSet': '$articlebase_id'
-                    },
-                }
-            }, {
-                '$addFields': {
-                    'article_count': {
-                        '$size': '$articles'
-                    }
-                }
-            }, {
-                '$match': {
-                    'article_count': {
-                        '$gte': val_min,
-                        '$lte': val_max
-                    }
-                }
-            }, {
-                '$project': {
-                    '_id': 1,
-                }
-            }
-        ]
-        result = aggregate_from_cerem(self.team.id, 'readbases', pipeline)
-        id_list = set([item['_id'] for item in result])
-
-        if val_min == 0: # find clients having no records
-            pipeline = [
-                {
-                    '$match': {
-                        'clientbase_id': {
-                            '$ne': None
-                        },
-                        'articlebase_id': {
-                            '$ne': None
-                        }
-                    }
-                }, {
-                    '$group': {
-                        '_id': None,
-                        'clients': {
-                            '$addToSet': '$clientbase_id'
-                        },
-                    }
-                }
-            ]
-            result = aggregate_from_cerem(self.team.id, 'readbases', pipeline)
-            no_record_ids = result[0]['clients']
-            original_pool = set(client_qs.values_list('id', flat=True))
-            id_list = id_list.union(original_pool) - set(no_record_ids)
-
-        raise UseIdList(id_list)
+        return client_qs, Q(media_info__article_count__range=article_count_range)
 
 
 @condition
@@ -97,72 +32,8 @@ class AverageReadPercentage(RangeCondition):
 
     def filter(self, client_qs: QuerySet, avg_read_percentage_range: Any) -> Tuple[QuerySet, Q]:
         val_min, val_max = avg_read_percentage_range
-        if val_min:
-            val_min = val_min / 100
-
-        if val_max:
-            val_max = val_max / 100
-
-        pipeline = [
-            {
-                '$match': {
-                    'clientbase_id': {
-                        '$ne': None
-                    },
-                    'articlebase_id': {
-                        '$ne': None
-                    }
-                }
-            }, {
-                '$group': {
-                    '_id': '$clientbase_id',
-                    'avg_progress': {
-                        '$avg': '$progress'
-                    },
-                }
-            }, {
-                '$match': {
-                    'avg_progress': {
-                        '$gte': val_min,
-                        '$lte': val_max
-                    }
-                }
-            }, {
-                '$project': {
-                    '_id': 1,
-                }
-            }
-        ]
-        result = aggregate_from_cerem(self.team.id, 'readbases', pipeline)
-        id_list = set([item['_id'] for item in result])
-
-        if val_min == 0: # find clients having no records
-            pipeline = [
-                {
-                    '$match': {
-                        'clientbase_id': {
-                            '$ne': None
-                        },
-                        'articlebase_id': {
-                            '$ne': None
-                        }
-                    }
-                }, {
-                    '$group': {
-                        '_id': None,
-                        'clients': {
-                            '$addToSet': '$clientbase_id'
-                        },
-                    }
-                }
-            ]
-            result = aggregate_from_cerem(self.team.id, 'readbases', pipeline)
-            no_record_ids = result[0]['clients']
-            original_pool = set(client_qs.values_list('id', flat=True))
-            id_list = id_list.union(original_pool) - set(no_record_ids)
-
-        raise UseIdList(id_list)
-
+        progress_range = (val_min / 100, val_max / 100)
+        return client_qs, Q(media_info__avg_reading_progress__range=progress_range)
 
 @condition
 class ArticleTagCondition(SelectCondition):

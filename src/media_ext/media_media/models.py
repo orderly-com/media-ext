@@ -123,6 +123,10 @@ class MediaInfo(BaseModel):
 
     clientbase = models.OneToOneField(ClientBase, related_name='media_info', blank=False, on_delete=models.CASCADE)
 
+    # aggregated data, for performance purposes
+    article_count = models.IntegerField(default=0)
+    avg_reading_progress = models.FloatField(default=0)
+
     def __getattr__(self, attr):
         if attr == 'readbase_set':
             return TeamMongoDB(self.clientbase.team).readbases.filter(clientbase_id=self.clientbase_id)
