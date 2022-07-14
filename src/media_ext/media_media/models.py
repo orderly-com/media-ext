@@ -40,7 +40,7 @@ class ArticleCategory(BaseModel):
 
 
 @media_ext.ProductModel
-@taggable(type_id='article')
+@taggable(type_name='article')
 class ArticleBase(ProductBase):
     class Meta:
         indexes = [
