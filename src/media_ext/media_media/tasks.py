@@ -13,7 +13,7 @@ from datahub.models import DataSync
 from team.models import Team
 from tag_assigner.models import TagAssigner, ValueTag
 
-from core.utils import batch_list, run
+from core.utils import run
 
 from cerem.tasks import insert_to_cerem, aggregate_from_cerem
 
