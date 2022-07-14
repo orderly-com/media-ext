@@ -130,20 +130,20 @@
             {# 智能貼標 #}
             <div class="panel panel-white">
 
-                {% with articlebase.get_value_tags as value_tags %}
+                {% with articlebase.get_tag_slots as tag_slots %}
 
                 <div class="panel-heading">
-                    <h5 class="panel-title">智能貼標 ({{ value_tags|length }})</h5>
+                    <h5 class="panel-title">智能貼標 ({{ tag_slots|length }})</h5>
                     <div class="heading-elements"></div>
                 </div>
 
                 <div class="panel-body tags">
 
-                    {% for value_tag in value_tags %}
-                        {% if value_tag.tag_type == MANUAL_TAG %}
-                            <a class="mr-20 mb-10 tag-secondary" tag-id="{{ value_tag.uuid }}" data-text="{{value_tag.name}}" href="{% url 'tag_assigner:detail' value_tag.uuid %}" target="_blank">{{ value_tag.name }}<i class="icon-cross3 ml-5 remove-tag text-danger-400"></i></a>
+                    {% for tag_slot in tag_slots %}
+                        {% if tag_slot.tag.tag_type == MANUAL_TAG %}
+                            <a class="mr-20 mb-10 tag-secondary" tag-id="{{ tag_slot.tag.uuid }}" data-text="{{tag_slot.tag.name}} ({{ tag_slot.amount }})" href="{% url 'tag_assigner:detail' tag_slot.tag.uuid %}" target="_blank">{{ tag_slot.tag.name }} ({{ tag_slot.amount }})<i class="icon-cross3 ml-5 remove-tag text-danger-400"></i></a>
                         {% else %}
-                            <a class="mr-20 mb-10 tag-primary" tag-id="{{ value_tag.uuid }}" href="{% url 'tag_assigner:detail' value_tag.uuid %}" data-text="{{value_tag.name}}" target="_blank">{{ value_tag.name }}</a>
+                            <a class="mr-20 mb-10 tag-primary" tag-id="{{ tag_slot.tag.uuid }}" href="{% url 'tag_assigner:detail' tag_slot.tag.uuid %}" data-text="{{tag_slot.tag.name}} ({{ tag_slot.amount }})" target="_blank">{{ tag_slot.tag.name }} ({{ tag_slot.amount }})</a>
                         {% endif %}
                     {% endfor %}
 
@@ -151,7 +151,6 @@
 
                 {% endwith %}
 
-            </div>
         </div>
     </div>
     <!-- /content area -->
