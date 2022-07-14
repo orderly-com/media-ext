@@ -9,7 +9,7 @@ from datahub.models import DataSource
 
 from core.models import BaseModel, ValueTaggable
 from team.models import Team, OrderBase, ProductBase, ClientBase, client_info_model
-from tag_assigner.utils import api_taggable
+from tag_assigner.utils import taggable
 
 from cerem.utils import TeamMongoDB, F, Sum
 
@@ -40,7 +40,7 @@ class ArticleCategory(BaseModel):
 
 
 @media_ext.ProductModel
-@api_taggable(type_id='article')
+@taggable(type_id='article')
 class ArticleBase(ProductBase):
     class Meta:
         indexes = [
@@ -124,6 +124,7 @@ class MediaInfo(BaseModel):
     clientbase = models.OneToOneField(ClientBase, related_name='media_info', blank=False, on_delete=models.CASCADE)
 
     # aggregated data, for performance purposes
+    reading_rank = models.IntegerField(default=0)
     article_count = models.IntegerField(default=0)
     avg_reading_progress = models.FloatField(default=0)
 

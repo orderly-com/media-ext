@@ -15,18 +15,14 @@
             <tr class="row">
                 <td class="col-md-4">瀏覽排名</td>
                 <td class="col-md-8">
-                    {% with clientbase.get_total_read_rank as total_read_rank %}
-
-                    {% if total_read_rank %}
+                    {% if clientbase.media_info.reading_rank %}
                         <div class="">
                             <span>#</span>
-                            <span class="text-semibold text-yellow h1">{{ total_read_rank|floatformat:0|int_format }}</span>
+                            <span class="text-semibold text-yellow h1">{{ clientbase.media_info.reading_rank|floatformat:0|int_format }}</span>
                         </div>
                     {% else %}
                         <div>--</div>
                     {% endif %}
-
-                    {% endwith %}
 
                 </td>
             </tr>
@@ -116,184 +112,6 @@
         <table class="table">
 
         </table>
-
-    </div>
-
-</div>
-
-<div class="col-md-12">
-
-
-    {# 智能貼標 #}
-    <div class="panel panel-white">
-
-        {% with clientbase.get_value_tags as value_tags %}
-
-        <div class="panel-heading">
-            <h5 class="panel-title">智能貼標 ({{ value_tags|length }})</h5>
-            <div class="heading-elements"></div>
-        </div>
-
-        <div class="panel-body tags">
-
-            {% for value_tag in value_tags %}
-                {% if value_tag.tag_type == MANUAL_TAG %}
-                    <a class="mr-20 mb-10 tag-secondary" tag-id="{{ value_tag.uuid }}" data-text="{{value_tag.name}}" href="{% url 'tag_assigner:detail' value_tag.uuid %}" target="_blank">{{ value_tag.name }}<i class="icon-cross3 ml-5 remove-tag text-danger-400"></i></a>
-                {% else %}
-                    <a class="mr-20 mb-10 tag-primary" tag-id="{{ value_tag.uuid }}" href="{% url 'tag_assigner:detail' value_tag.uuid %}" data-text="{{value_tag.name}}" target="_blank">{{ value_tag.name }}</a>
-                {% endif %}
-            {% endfor %}
-
-        </div>
-
-        {% endwith %}
-
-    </div>
-{% comment %}
-    {# 購買偏好 #}
-    <div class="panel panel-white">
-
-        {% with clientbase.get_productbase_list_has_bought as productbase_list %}
-
-        <div class="panel-heading">
-            <h5 class="panel-title">購買偏好 ({{ productbase_list|length }})</h5>
-            <div class="heading-elements"></div>
-        </div>
-
-        <table class="table">
-
-            <thead class="">
-                <tr class="row">
-                    <th class="col-md-3"></th>
-                    <th class="col-md-7">品名</th>
-                    <th class="col-md-2 text-right">個數</th>
-                </tr>
-            </thead>
-
-            <tbody>
-
-                {% for product in productbase_list %}
-
-                    <tr class="row">
-                        <td class="">
-                            <span class="text-muted text-size-small mr-10">#{{forloop.counter}}</span>
-                            <a href="{{product.url}}" target="_blank">{{product.external_id}}</a>
-                        </td>
-                        <td class=""><a href="{{product.url}}" target="_blank">{{product.name}}</a></td>
-                        <td class="text-right">{{product.count}}</td>
-                    </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-        {% endwith %}
-
-    </div> {% endcomment %}
-
-    {# Facebook 評論 #}
-    {% with clientbase.get_facebook_review as facebook_review %}
-
-    {% if facebook_review %}
-
-        <div class="panel panel-white">
-
-            <div class="panel-heading">
-                <h5 class="panel-title">{% trans "Facebook 評論" %}</h5>
-                <div class="heading-elements"></div>
-            </div>
-
-            <table class="table text-size-small">
-
-                <tbody>
-
-                    <tr class="row">
-                        <td class="col-md-2">{{facebook_review.created_time|date:"Y-m-d"}}</td>
-
-                        <td class="col-md-10">
-                            {{facebook_review.review_text}}
-                        </td>
-                    </tr>
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    {% endif %}
-
-    {% endwith %}
-
-
-    {# Facebook 按讚記錄 #}
-    <div class="panel panel-white">
-
-        {% with clientbase.get_facebook_likes as facebook_likes %}
-
-        <div class="panel-heading">
-            <h5 class="panel-title">{% trans "Facebook 按讚記錄" %} ({{ facebook_likes|length }})</h5>
-            <div class="heading-elements"></div>
-        </div>
-
-        <table class="table text-size-small">
-
-            <tbody>
-
-                {% for like in facebook_likes %}
-
-                    <tr class="row">
-                        <td class="col-md-2">{{like.post__created_time|date:"Y-m-d"}}</td>
-
-                        <td class="col-md-10">
-                            <a href="{{like.post__permalink_url}}" target="_blank">{{like.post__message|truncatechars:40}}</a>
-                        </td>
-                    </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-        {% endwith %}
-
-    </div>
-
-    {# Facebook 評論記錄 #}
-    <div class="panel panel-white">
-
-        {% with clientbase.get_facebook_comments as facebook_comments %}
-
-        <div class="panel-heading">
-            <h5 class="panel-title">{% trans "Facebook 評論記錄" %} ({{ facebook_comments|length }})</h5>
-            <div class="heading-elements"></div>
-        </div>
-
-        <table class="table text-size-small">
-
-            <tbody>
-
-                {% for comment in facebook_comments %}
-
-                    <tr class="row">
-                        <td class="col-md-2">{{comment.created_time|date:"Y-m-d"}}</td>
-
-                        <td class="col-md-5">
-                            <a href="{{comment.post__permalink_url}}" target="_blank">{{comment.post__message|truncatechars:40}}</a>
-                        </td>
-                        <td class="col-md-5"><a href="{{comment.permalink_url}}" target="_blank">{{comment.message}}</a></td>
-                    </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-        {% endwith %}
 
     </div>
 

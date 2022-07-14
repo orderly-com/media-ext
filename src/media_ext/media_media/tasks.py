@@ -22,6 +22,9 @@ from .models import MediaInfo
 
 from ..extension import media_ext
 
+def reading_score(item):
+    return item['article_count']
+
 @app.task
 def sync_media_info(team):
     existing_ids = set(MediaInfo.objects.filter(clientbase__team_id=team.id).values_list('clientbase_id', flat=True))
@@ -65,8 +68,8 @@ def sync_media_info(team):
             }
         }
     ]
-    result = aggregate_from_cerem(team.id, 'readbases', pipeline)
-    for item in result:
+    result = sorted(aggregate_from_cerem(team.id, 'readbases', pipeline), key=reading_score, reverse=True)
+    for i, item in enumerate(result):
 
         client_id = item['_id']
         article_count = item['article_count']
@@ -75,12 +78,13 @@ def sync_media_info(team):
             continue
         info = MediaInfo(
             id=info_map[client_id],
+            reading_rank=i+1,
             article_count=article_count,
             avg_reading_progress=avg_progress,
         )
         info_objects_to_update.append(info)
-
-    MediaInfo.objects.bulk_update(info_objects_to_update, ['article_count', 'avg_reading_progress'], batch_size=settings.BATCH_SIZE_M)
+    update_fields = ['article_count', 'avg_reading_progress', 'reading_rank']
+    MediaInfo.objects.bulk_update(info_objects_to_update, update_fields, batch_size=settings.BATCH_SIZE_M)
 
 
 @media_ext.periodic_task()
