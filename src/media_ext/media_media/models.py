@@ -8,8 +8,9 @@ from django.contrib.postgres.fields import JSONField, ArrayField
 from datahub.models import DataSource
 
 from core.models import BaseModel, ValueTaggable
-from team.models import Team, OrderBase, ProductBase, ClientBase, client_info_model
-from tag_assigner.utils import taggable
+from team.models import Team, OrderBase, ProductBase, ClientBase
+from team.registries import client_info_model
+from tag_assigner.registries import taggable
 
 from cerem.utils import TeamMongoDB, F, Sum
 
@@ -40,7 +41,7 @@ class ArticleCategory(BaseModel):
 
 
 @media_ext.ProductModel
-@taggable(type_id='article')
+@taggable('article')
 class ArticleBase(ProductBase):
     class Meta:
         indexes = [
