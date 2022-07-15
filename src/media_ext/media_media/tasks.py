@@ -10,7 +10,7 @@ from cerem.tasks import fetch_site_tracking_data
 from cerem.utils import kafka_headers
 
 from datahub.models import DataSync
-from team.models import Team
+from team.models import Team, ClientBase
 from tag_assigner.models import TagAssigner, ValueTag
 
 from core.utils import run
@@ -25,8 +25,77 @@ from ..extension import media_ext
 def reading_score(item):
     return item['article_count']
 
+@media_ext.periodic_task()
+def tag_through_read():
+    pipeline = [
+        {
+            '$match': {
+                'clientbase_id': {
+                    '$ne': None
+                },
+                'articlebase_id': {
+                    '$ne': None
+                },
+                'client_tagged': {
+                    '$ne': True
+                }
+            }
+        }, {
+            '$group': {
+                '_id': '$clientbase_id',
+                'articles': {
+                    '$addToSet': '$articlebase_id'
+                },
+            }
+        }, {
+            '$project': {
+                '_id': 1,
+                'articles': 1,
+            }
+        }
+    ]
+    result = sorted(aggregate_from_cerem(team.id, 'readbases', pipeline), key=reading_score, reverse=True)
+    assigner = TagAssigner(team, ClientBase)
+    for i, item in enumerate(result):
+
+        client_id = item['_id']
+        articles = item['articles']
+        targets = ClientBase.objects.filter(id=client_id)
+        tag_ids = set()
+        tag_ids = tag_ids.union(ArticleBase.objects.filter(id__in=articles).values_list('value_tag_ids', flat=True))
+        tags = team.valuetag_set.filter(id__in=tag_ids)
+        assigner.bulk_assign_tags(targets, tags)
+
+    pipeline = [
+        {
+            '$match': {
+                'clientbase_id': {
+                    '$ne': None
+                },
+                'articlebase_id': {
+                    '$ne': None
+                },
+                'client_tagged': {
+                    '$ne': True
+                }
+            }
+        }, {
+            '$project': {
+                '_id': '$_id',
+                'client_tagged': True,
+            }
+        }, {
+            '$merge': {
+                'into': 'readbases',
+            }
+        }
+    ]
+    aggregate_from_cerem(team.id, 'readbases', pipeline)
+
+
 @app.task
-def sync_media_info(team):
+def sync_media_info(team_id):
+    team = Team.objects.get(id=team_id)
     existing_ids = set(MediaInfo.objects.filter(clientbase__team_id=team.id).values_list('clientbase_id', flat=True))
     all_ids = set(team.clientbase_set.filter(removed=False).values_list('id', flat=True))
     ids_to_add_info = all_ids - existing_ids
@@ -186,7 +255,8 @@ def sync_reading_data(period_from=None, period_to=None, **kwargs):
                 append_readevent(readbase, event)
                 insert_to_cerem(team.id, 'readbases', readbases)
 
-        run(sync_media_info, team)
+        run(sync_media_info, team.id)
+
 
 @media_ext.periodic_task()
 def find_reader(*args, **kwargs):
