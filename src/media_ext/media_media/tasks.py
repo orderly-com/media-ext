@@ -25,7 +25,6 @@ from ..extension import media_ext
 def reading_score(item):
     return item['article_count']
 
-@app.task
 def sync_media_info(team):
     existing_ids = set(MediaInfo.objects.filter(clientbase__team_id=team.id).values_list('clientbase_id', flat=True))
     all_ids = set(team.clientbase_set.filter(removed=False).values_list('id', flat=True))
@@ -184,9 +183,9 @@ def sync_reading_data(period_from=None, period_to=None, **kwargs):
                     readbase = create_readbase(event)
 
                 append_readevent(readbase, event)
-                insert_to_cerem(team.id, 'readbases', readbases)
+            insert_to_cerem(team.id, 'readbases', readbases)
 
-        run(sync_media_info, team)
+        sync_media_info(team)
 
 @media_ext.periodic_task()
 def find_reader(*args, **kwargs):
