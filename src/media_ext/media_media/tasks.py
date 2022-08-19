@@ -87,7 +87,7 @@ def sync_media_info(team):
 
 
 @media_ext.periodic_task()
-def sync_reading_data(period_from=None, period_to=None, **kwargs):
+def sync_reading_data(period_from=None, period_to=None, sync_info_model=True, **kwargs):
     for team in Team.objects.all():
         articlebases = list(
             team.articlebase_set.filter(removed=False, location_rule__isnull=False).exclude(location_rule='').values('id', 'location_rule')
@@ -184,8 +184,8 @@ def sync_reading_data(period_from=None, period_to=None, **kwargs):
 
                 append_readevent(readbase, event)
             insert_to_cerem(team.id, 'readbases', readbases)
-
-        sync_media_info(team)
+        if sync_info_model:
+            sync_media_info(team)
 
 @media_ext.periodic_task()
 def find_reader(*args, **kwargs):
