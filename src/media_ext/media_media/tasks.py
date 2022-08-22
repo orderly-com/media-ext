@@ -190,10 +190,14 @@ def sync_reading_data(period_from=None, period_to=None, sync_info_model=True, **
 @media_ext.periodic_task()
 def find_reader(*args, **kwargs):
     for team in Team.objects.all():
+        now = timezone.now()
         pipeline = [
             {
                 '$match': {
-                    'clientbase_id': None
+                    'clientbase_id': None,
+                    'datetime': {
+                        '$gte': now - datetime.timedelta(days=3)
+                    }
                 }
             }, {
                 '$lookup': {
