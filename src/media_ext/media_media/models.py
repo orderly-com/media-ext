@@ -127,6 +127,7 @@ class MediaInfo(BaseModel):
     # aggregated data, for performance purposes
     reading_rank = models.IntegerField(default=0)
     article_count = models.IntegerField(default=0)
+    last_read_datetime = models.DateTimeField(null=True, blank=True)
     avg_reading_progress = models.FloatField(default=0)
 
     def __getattr__(self, attr):
