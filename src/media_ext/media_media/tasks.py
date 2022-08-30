@@ -58,12 +58,16 @@ def sync_media_info(team):
                 'avg_progress': {
                     '$avg': '$progress'
                 },
+                'last_read_datetime': {
+                    '$max': '$datetime'
+                },
             }
         }, {
             '$project': {
                 '_id': 1,
                 'avg_progress': 1,
                 'article_count': {'$size': '$articles'},
+                'last_read_datetime': 1
             }
         }
     ]
@@ -73,6 +77,7 @@ def sync_media_info(team):
         client_id = item['_id']
         article_count = item['article_count']
         avg_progress = item['avg_progress']
+        last_read_datetime = item['last_read_datetime']
         if client_id not in info_map:
             continue
         info = MediaInfo(
@@ -80,9 +85,10 @@ def sync_media_info(team):
             reading_rank=i+1,
             article_count=article_count,
             avg_reading_progress=avg_progress,
+            last_read_datetime=last_read_datetime
         )
         info_objects_to_update.append(info)
-    update_fields = ['article_count', 'avg_reading_progress', 'reading_rank']
+    update_fields = ['article_count', 'avg_reading_progress', 'reading_rank', 'last_read_datetime']
     MediaInfo.objects.bulk_update(info_objects_to_update, update_fields, batch_size=settings.BATCH_SIZE_M)
 
 
