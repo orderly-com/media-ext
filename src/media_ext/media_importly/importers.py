@@ -10,6 +10,7 @@ from importly.formatters import (
 )
 
 from datahub.data_flows import handle_data
+from datahub.models import Field, FieldGroup, ChoiceField
 
 from ..media_media.datahub import channels, DataTypeArticle, DataTypeRead
 from ..media_media.models import ArticleBase, ArticleCategory
@@ -40,6 +41,28 @@ class ArticleImporter(DataImporter):
             attributions = Formatted(dict, 'attributions')
 
             categories = Formatted(list, 'categories')
+
+    group_article = FieldGroup(key='CLIENT', name='會員')
+
+    id = Field('文章編號', required=True, group=group_article)
+
+    author = Field('作者', group=group_article)
+    title = Field('文章標題', group=group_article)
+    content = Field('文章內容', group=group_article)
+    path = Field('網址', group=group_article)
+
+    STATUS_CHOIES = {
+        ArticleBase.STATE_DRAFT: '草稿',
+        ArticleBase.STATE_PUBLISHED: '已發佈',
+        ArticleBase.STATE_PRIVATE: '私人',
+        ArticleBase.STATE_UNSET: '未知'
+    }
+
+    status = ChoiceField('狀態', choices=STATUS_CHOIES, group=group_article)
+
+    datetime = Field('發布日期', group=group_article)
+
+    attributions = Field('文章屬性', group=group_article, is_attributions=True)
 
     def process_raw_records(self):
         articlebases_to_create = []

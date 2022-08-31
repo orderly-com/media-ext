@@ -1,6 +1,9 @@
 import re
 
-from datahub.models import DataType
+from django.urls import reverse
+
+from datahub.models import DataType, data_type
+from .models import ArticleBase
 
 from ..extension import media_ext
 
@@ -11,6 +14,33 @@ class DataTypeRead(DataType):
 
 class DataTypeArticle(DataType):
     key = 'article'
+
+    @staticmethod
+    def get_records_fields_display():
+        return [
+            ('external_id', '文章編號', '1', 'text-center'),
+            ('datetime',    '發布日期', '1', 'text-center'),
+            ('title',       '文章標題', '1', 'text-center'),
+            ('author',      '作者',     '1', 'text-center'),
+            ('external_id', '文章標題', '1', 'text-center'),
+        ]
+
+    @staticmethod
+    def get_records(datalist):
+        external_ids = datalist.article_set.values('external_id')
+        articlebase_qs = datalist.team.articlebase_set.filter(external_id__in=external_ids, removed=False)
+        records = list(articlebase_qs.values('datetime', 'external_id', 'title', 'author', 'uuid'))
+        for record in records:
+            if record['datetime']:
+                record['datetime'] = record['datetime'].strftime('%Y-%m-%d')
+            else:
+                record['datetime'] = '-'
+            external_id = record['external_id'] or '-'
+            url = reverse('media:article-detail', kwargs={'uuid': record['uuid']})
+            record['external_id'] = f'<a class="text-info" href="{url}">{external_id}</a>'
+            record['title'] = record['title'] or '-'
+
+        return records
 
 
 class DataTypeSyncReadingData(DataType):
