@@ -12,6 +12,7 @@ class DataTypeRead(DataType):
     key = 'read'
 
 
+@data_type
 class DataTypeArticle(DataType):
     key = 'article'
 
