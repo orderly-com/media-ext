@@ -94,7 +94,6 @@ def sync_media_info(team):
 
 
 def sync_article_reading_data(team):
-    info_objects_to_update = []
     pipeline = [
         {
             '$match': {
@@ -131,6 +130,8 @@ def sync_article_reading_data(team):
                     user_read_count=item['user_read_count']
                 )
             )
+    update_fields = ['clientbase_read_count', 'user_read_count']
+    team.articlebase_set.bulk_update(articlebases_to_update, update_fields=update_fields, batch_size=settings.BATCH_SIZE_M)
 
 
 @media_ext.periodic_task()
