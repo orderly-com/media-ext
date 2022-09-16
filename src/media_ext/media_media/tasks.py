@@ -25,6 +25,7 @@ from ..extension import media_ext
 def reading_score(item):
     return item['article_count']
 
+
 def sync_media_info(team):
     existing_ids = set(MediaInfo.objects.filter(clientbase__team_id=team.id).values_list('clientbase_id', flat=True))
     all_ids = set(team.clientbase_set.filter(removed=False).values_list('id', flat=True))
@@ -92,8 +93,48 @@ def sync_media_info(team):
     MediaInfo.objects.bulk_update(info_objects_to_update, update_fields, batch_size=settings.BATCH_SIZE_M)
 
 
+def sync_article_reading_data(team):
+    info_objects_to_update = []
+    pipeline = [
+        {
+            '$match': {
+                'articlebase_id': {
+                    '$ne': None
+                }
+            }
+        }, {
+            '$group': {
+                '_id': '$articlebase_id',
+                'articles': {
+                    '$addToSet': '$clientbase_id'
+                },
+                'user_read_count': {
+                    '$sum': 1
+                }
+            }
+        }, {
+            '$project': {
+                '_id': 1,
+                'client_read_count': {'$size': '$articles'},
+                'user_read_count': 1,
+            }
+        }
+    ]
+    articlebases_to_update = []
+    articlebase_ids = list(team.articlebase_set.values('id', flat=True))
+    for item in aggregate_from_cerem(team.id, 'readbases', pipeline):
+        if item['_id'] in articlebase_ids:
+            articlebases_to_update.append(
+                ArticleBase(
+                    id=item['_id'],
+                    clientbase_read_count=item['client_read_count'],
+                    user_read_count=item['user_read_count']
+                )
+            )
+
+
 @media_ext.periodic_task()
-def sync_reading_data(period_from=None, period_to=None, sync_info_model=True, **kwargs):
+def sync_reading_data(period_from=None, period_to=None, sync_info_model=True, sync_articles=True, **kwargs):
     for team in Team.objects.all():
         articlebases = list(
             team.articlebase_set.filter(removed=False, location_rule__isnull=False).exclude(location_rule='').values('id', 'location_rule')
@@ -192,6 +233,8 @@ def sync_reading_data(period_from=None, period_to=None, sync_info_model=True, **
             insert_to_cerem(team.id, 'readbases', readbases)
         if sync_info_model:
             sync_media_info(team)
+        if sync_articles:
+            sync_article_reading_data(team)
 
 @media_ext.periodic_task()
 def find_reader(*args, **kwargs):
