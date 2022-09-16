@@ -37,15 +37,16 @@ class TopArticleTags(HorizontalBarChart):
         return '點閱數'
 
     def draw(self):
+        raise NoData('數據不足')
         mode = self.options.get('mode')
         display_count = self.options.get('display_count', 10)
         tag_map = {}
 
-        for article in self.team.articlebase_set.filter(removed=False).all():
+        for article in self.team.articlebase_set.filter(removed=False).values('id', 'user_read_count', 'clientbase_read_count'):
             if mode == self.MODE_ALL_CLIENTS:
-                count = article.readbase_set.count()
+                count = article['user_read_count']
             else:
-                count = article.readbase_set.filter(F('clientbase_id') != None).count()
+                count = article['clientbase_read_count']
             for tag_id in article.value_tag_ids:
                 tag_map[tag_id] = tag_map.get(tag_id, 0)
                 tag_map[tag_id] += 1
@@ -74,6 +75,7 @@ class AvgReadCountPerVisit(DataCard):
         )
 
     def draw(self):
+        raise NoData('數據不足')
         mode = self.options.get('mode')
         read_article_count_data = [] # 1, 2, 5, 3
         for clientbase in self.team.clientbase_set.only('id'):

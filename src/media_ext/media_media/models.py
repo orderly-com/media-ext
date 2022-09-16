@@ -58,6 +58,9 @@ class ArticleBase(ProductBase):
 
     datetime = models.DateTimeField(blank=True, null=True)
 
+    user_read_count = models.IntegerField(default=0)
+    clientbase_read_count = models.IntegerField(default=0)
+
     author = models.TextField(blank=False)
     title = models.TextField(blank=False)
     path = models.TextField(blank=False)
