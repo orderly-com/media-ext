@@ -11,6 +11,17 @@ class DataTypeRead(DataType):
 
 class DataTypeArticle(DataType):
     key = 'article'
+    name = '文章'
+
+    @staticmethod
+    def get_datetime_min(datalist):
+        aggregation = datalist.article_set.aggregate(min_datetime=Min('datetime'))
+        return aggregation['min_datetime']
+
+    @staticmethod
+    def get_datetime_max(datalist):
+        aggregation = datalist.article_set.aggregate(max_datetime=Max('datetime'))
+        return aggregation['max_datetime']
 
 
 class DataTypeSyncReadingData(DataType):
