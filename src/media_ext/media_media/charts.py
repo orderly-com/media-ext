@@ -37,17 +37,20 @@ class TopArticleTags(HorizontalBarChart):
         return '點閱數'
 
     def draw(self):
-        raise NoData('數據不足')
         mode = self.options.get('mode')
         display_count = self.options.get('display_count', 10)
         tag_map = {}
-
-        for article in self.team.articlebase_set.filter(removed=False).values('id', 'user_read_count', 'clientbase_read_count'):
+        articles = (
+            self.team.articlebase_set
+            .filter(removed=False)
+            .values('id', 'user_read_count', 'clientbase_read_count', 'value_tag_ids')
+        )
+        for article in articles:
             if mode == self.MODE_ALL_CLIENTS:
                 count = article['user_read_count']
             else:
                 count = article['clientbase_read_count']
-            for tag_id in article.value_tag_ids:
+            for tag_id in article['value_tag_ids']:
                 tag_map[tag_id] = tag_map.get(tag_id, 0)
                 tag_map[tag_id] += 1
 
@@ -62,35 +65,16 @@ class TopArticleTags(HorizontalBarChart):
 
 @client_behavior_charts.chart(name='人均點閱次數')
 class AvgReadCountPerVisit(DataCard):
+    def draw(self):
+        query = f"select avg(article_count) from (select count(pt) as article_count, cid, toStartOfHour(t) from events where tc='{self.team.integration.team_code}' group by cid, toStartOfHour(t)) as visits"
+        data = clickhouse_client.execute(query)[0][0]
+        self.create_label(name='人均點閱次數', data=data)
 
-    MODE_ALL_CLIENTS = 'all'
-    MODE_MEMBER_ONLY = 'member'
 
-    def __init__(self):
-        self.add_options(
-            mode=ModeCondition('').choice(
-                {'text': '全部', 'id': self.MODE_ALL_CLIENTS},
-                {'text': '純會員', 'id': self.MODE_MEMBER_ONLY}
-            ).default(self.MODE_ALL_CLIENTS)
-        )
+@client_behavior_charts.chart(name='會員人均點閱次數')
+class MemberAvgReadCountPerVisit(DataCard):
 
     def draw(self):
-        raise NoData('數據不足')
-        mode = self.options.get('mode')
-        read_article_count_data = [] # 1, 2, 5, 3
-        for clientbase in self.team.clientbase_set.only('id'):
-            data = clientbase.media_info.readbase_set.values('datetime', 'articlebase_id')
-            if not data:
-                continue
-            previous_time = data[0]['datetime']
-            articles = set()
-            for item in sorted(data, key=lambda item: item['datetime']):
-                if (item['datetime'] - previous_time).total_seconds > 7200:
-                    read_article_count_data.append(len(articles))
-                    articles = set()
-                else:
-                    articles.add(item['articlebase_id'])
-                previous_time = item['datetime']
-        if not read_article_count_data:
-            raise NoData('數據不足')
-        self.create_label(name='人均點閱次數', data=statistics.mean(read_article_count_data))
+        query = f"select avg(article_count) from (select count(pt) as article_count, cid, toStartOfHour(t) from events where uid != '' and tc='{self.team.integration.team_code}' group by cid, toStartOfHour(t)) as visits"
+        data = clickhouse_client.execute(query)[0][0]
+        self.create_label(name='會員人均點閱次數', data=data)
