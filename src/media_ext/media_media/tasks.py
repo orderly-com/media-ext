@@ -120,7 +120,7 @@ def sync_article_reading_data(team):
         }
     ]
     articlebases_to_update = []
-    articlebase_ids = list(team.articlebase_set.values('id', flat=True))
+    articlebase_ids = list(team.articlebase_set.values_list('id', flat=True))
     for item in aggregate_from_cerem(team.id, 'readbases', pipeline):
         if item['_id'] in articlebase_ids:
             articlebases_to_update.append(
