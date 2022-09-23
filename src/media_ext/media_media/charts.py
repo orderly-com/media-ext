@@ -68,7 +68,7 @@ class AvgReadCountPerVisit(DataCard):
     def draw(self):
         query = f"select avg(article_count) from (select count(pt) as article_count, cid, toStartOfHour(t) from events where at='view' AND tc='{self.team.integration.team_code}' group by cid, toStartOfHour(t)) as visits"
         data = clickhouse_client.execute(query)[0][0]
-        self.create_label(name='人均點閱次數', data=data)
+        self.create_label(name='人均點閱次數', data=f'{data:.1f}次')
 
 
 @client_behavior_charts.chart(name='會員人均點閱次數')
@@ -77,4 +77,4 @@ class MemberAvgReadCountPerVisit(DataCard):
     def draw(self):
         query = f"select avg(article_count) from (select count(pt) as article_count, cid, toStartOfHour(t) from events where at='view' AND uid != '' and tc='{self.team.integration.team_code}' group by cid, toStartOfHour(t)) as visits"
         data = clickhouse_client.execute(query)[0][0]
-        self.create_label(name='會員人均點閱次數', data=data)
+        self.create_label(name='會員人均點閱次數', data=f'{data:.1f}次')
