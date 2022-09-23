@@ -27,8 +27,11 @@ def process_articlelist(team_slug, data):
 
     importer = ArticleImporter(team, datasource)
 
-    importer.create_datalist(rows)
+    datalist = importer.create_datalist(rows)
+    datalist.set_step(DataList.STEP_CREATE_RAW_RECORDS)
 
     importer.data_to_raw_records()
+    datalist.set_step(DataList.STEP_PROCESS_RAW_RECORDS)
 
     importer.process_raw_records()
+    datalist.set_step(DataList.STEP_DONE)

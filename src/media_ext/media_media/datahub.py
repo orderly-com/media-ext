@@ -1,6 +1,6 @@
 import re
 
-from datahub.models import DataType
+from datahub.models import DataType, data_type
 
 from ..extension import media_ext
 
@@ -9,9 +9,11 @@ class DataTypeRead(DataType):
     key = 'read'
 
 
+@data_type
 class DataTypeArticle(DataType):
     key = 'article'
     name = '文章'
+    color = 'blue'
 
     @staticmethod
     def get_datetime_min(datalist):
