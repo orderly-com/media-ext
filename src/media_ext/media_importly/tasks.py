@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 
 from datahub.models import DataSource
 from importly.exceptions import EssentialDataMissing
+from importly.models import DataList
 
 from config.celery import app
 from team.models import Team
