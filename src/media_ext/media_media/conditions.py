@@ -12,7 +12,7 @@ from tag_assigner.models import ValueTag
 from cerem.tasks import aggregate_from_cerem
 
 
-@condition
+@condition('文章閱讀數')
 class ArticleCount(RangeCondition):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -23,7 +23,7 @@ class ArticleCount(RangeCondition):
         return client_qs, Q(media_info__article_count__range=article_count_range)
 
 
-@condition
+@condition('平均閱讀百分比')
 class AverageReadPercentage(RangeCondition):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -35,7 +35,8 @@ class AverageReadPercentage(RangeCondition):
         progress_range = (val_min / 100, val_max / 100)
         return client_qs, Q(media_info__avg_reading_progress__range=progress_range)
 
-@condition
+
+@condition('閱讀過文章關鍵詞')
 class ArticleTagCondition(SelectCondition):
     def filter(self, client_qs: QuerySet, choices: Any) -> Tuple[QuerySet, Q]:
 
