@@ -12,6 +12,10 @@ class MediaExtension(Extension):
 
     def define_mongodb_collections(self):
         return {
+            'clientbases':
+            {
+                'indexes': ['cids']
+            },
             'readbases':
             {
                 'indexes': ['cid', 'progress', 'clientbase_id', 'productbase_id', 'datetime'],
