@@ -18,7 +18,7 @@ class MediaExtension(Extension):
             },
             'readbases':
             {
-                'indexes': ['cid', 'progress', 'clientbase_id', 'productbase_id', 'datetime'],
+                'indexes': ['cid', 'progress', 'clientbase_id', 'productbase_id', 'datetime', 'target'],
                 'schema': {
                     'datetime': {'type': 'datetime'},
                     'events.datetime': {'type': 'datetime'}

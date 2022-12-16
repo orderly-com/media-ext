@@ -1,3 +1,4 @@
+import json
 import re
 import gc
 import datetime
@@ -178,6 +179,10 @@ def sync_reading_data(period_from=None, period_to=None, sync_info_model=True, sy
                 path = event['path']
                 key_pair = (cid, path)
                 readbase = event.copy()
+                try:
+                    event['params'] = json.loads(event['params'])
+                except:
+                    event['params'] = {}
                 readbase['events'] = []
                 readbase['progress'] = 0
                 readbase_map[key_pair] = readbase
@@ -216,6 +221,7 @@ def sync_reading_data(period_from=None, period_to=None, sync_info_model=True, sy
                     'path': row[kafka_headers.PATH],
                     'action': row[kafka_headers.ACTION],
                     'params': row[kafka_headers.PARAMS],
+                    'target': row[kafka_headers.TARGET],
                 }
                 cid = event['cid']
                 path = event['path']
