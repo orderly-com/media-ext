@@ -178,11 +178,11 @@ def sync_reading_data(period_from=None, period_to=None, sync_info_model=True, sy
                 cid = event['cid']
                 path = event['path']
                 key_pair = (cid, path)
-                readbase = event.copy()
                 try:
                     event['params'] = json.loads(event['params'])
                 except:
                     event['params'] = {}
+                readbase = event.copy()
                 readbase['events'] = []
                 readbase['progress'] = 0
                 readbase_map[key_pair] = readbase
