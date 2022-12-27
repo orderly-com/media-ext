@@ -132,9 +132,10 @@ class MediaInfo(BaseModel):
     last_read_datetime = models.DateTimeField(null=True, blank=True)
     avg_reading_progress = models.FloatField(default=0)
 
-    def __getattr__(self, attr):
-        if attr == 'readbase_set':
-            return TeamMongoDB(self.clientbase.team).readbases.filter(clientbase_id=self.clientbase_id)
+
+    @property
+    def readbase_set(self):
+        return TeamMongoDB(self.clientbase.team).readbases.filter(clientbase_id=self.clientbase_id)
 
     def get_sum_of_total_read(self):
         qs = self.clientbase.media_info.readbase_set
