@@ -51,10 +51,9 @@ class ArticleBase(ProductBase):
             models.Index(fields=['team', 'datasource']),
             models.Index(fields=['team', 'title']),
         ]
-
-    def __getattr__(self, attr):
-        if attr == 'readbase_set':
-            return TeamMongoDB(self.team).readbases.filter(articlebase_id=self.id)
+    @property
+    def readbase_set(self):
+        return TeamMongoDB(self.team).readbases.filter(articlebase_id=self.id)
 
     datetime = models.DateTimeField(blank=True, null=True)
 
